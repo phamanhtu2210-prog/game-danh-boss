@@ -74,6 +74,18 @@ canvas{display:block;position:fixed;inset:0}
 #combo{top:calc(var(--u)*16)!important}
 #arrows i{position:fixed;font-style:normal;color:#ff5050;font-size:calc(var(--u)*2.6);text-shadow:0 0 6px #000;pointer-events:none}#arrows i.ab{color:#d060ff;font-size:calc(var(--u)*4)}
 .dmg.sum{font-size:calc(var(--u)*2.4);color:#9fe6ff;text-shadow:0 0 8px #08f,2px 2px 0 #000}.dmg.imm{font-size:calc(var(--u)*2);color:#ccc}
+/* pass18: mobile skill buttons — larger + spread for thumb, pointer:coarse only */
+@media (pointer:coarse){
+.sk{width:clamp(48px,14vmin,58px);height:clamp(48px,14vmin,58px);font-size:clamp(18px,5.2vmin,24px)}
+.sk b{font-size:clamp(14px,4vmin,20px)}
+.sk em{font-size:clamp(9px,2.2vmin,12px)}
+#atk{right:clamp(10px,4vmin,18px);bottom:clamp(10px,4vmin,18px);width:clamp(68px,20vmin,84px);height:clamp(68px,20vmin,84px);font-size:clamp(26px,7.5vmin,34px)}
+#dodge{right:clamp(160px,57.5vmin,240px);bottom:clamp(16px,6.5vmin,28px);width:clamp(44px,12.8vmin,54px);height:clamp(44px,12.8vmin,54px);font-size:clamp(16px,4.6vmin,22px)}
+.s0{right:clamp(100px,35vmin,150px);bottom:clamp(14px,5.5vmin,24px)}
+.s1{right:clamp(96px,34vmin,145px);bottom:clamp(80px,28.5vmin,120px)}
+.s2{right:clamp(50px,18.5vmin,80px);bottom:clamp(130px,45.5vmin,190px)}
+.s3{right:clamp(6px,2.2vmin,12px);bottom:clamp(160px,55.5vmin,230px)}
+}
 </style></head><body>
 <div id="grade"></div><div id="vig"></div><div id="pops"></div>
 <div id="hud">
