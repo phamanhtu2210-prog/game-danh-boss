@@ -80626,12 +80626,65 @@ const MODELS={
   const ll=new T.PointLight(0x60ffd0,15,9,1.5);ll.position.set(0,4,1.5);g.add(ll);
   const NA=100,ap=new Float32Array(NA*3),as=[];for(let i=0;i<NA;i++)as.push([rnd(0,6.3),rnd(.6,2),rnd(0,6)]);const au=new T.Points(new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(ap,3)),new T.PointsMaterial({map:dot,color:0x60ffd0,size:.45,blending:T.AdditiveBlending,transparent:true,depthWrite:false}));g.add(au);
   g.anim=(t,e)=>{b.position.y=.4+Math.sin(t*1.8)*.2;sk.rotation.y=t*3;const pa=au.geometry.attributes.position;for(let i=0;i<NA;i++){const[a,r,o]=as[i];const y=(t*.7+o)%4;pa.setXYZ(i,Math.cos(a+t*.6)*r,y*1.5,Math.sin(a+t*.6)*r)}pa.needsUpdate=true};return g},
- slimeKing(){const g=MODELS.slime(0x48c860);g.scale.setScalar(3.6);const cr=new T.Group();cr.position.y=.95;const gm=M(0xffd040,{metalness:.8,roughness:.3});
-  cr.add(mesh(new T.CylinderGeometry(.32,.36,.14,8),gm,[0,0,0]));for(let i=0;i<5;i++){const a=i/5*Math.PI*2;cr.add(mesh(new T.ConeGeometry(.07,.25,4),gm,[Math.cos(a)*.32,.18,Math.sin(a)*.32]))}
-  cr.add(mesh(new T.OctahedronGeometry(.07,0),B(0xff3060),[0,.05,.37],false));g.add(cr);return g},
- batLord(){const g=MODELS.bat();g.scale.setScalar(3.2);g.traverse(o=>{if(o.material&&o.material.emissive){o.material=o.material.clone();o.material.color.offsetHSL(0,.1,.2);o.material.emissive.set(0x3a1a70)}});g.add((l=>{l.position.set(0,6,2);return l})(new T.PointLight(0xb080ff,14,10)));const inner=g.children[0];eyes(inner,0xff1010,.15,.36,.14,.09);
-  inner.add(mesh(new T.ConeGeometry(.05,.2,4),M(0xffffff),[-.08,-.2,.32]));inner.add(mesh(new T.ConeGeometry(.05,.2,4),M(0xffffff),[.08,-.2,.32]));
-  const old=g.anim;g.anim=(t,e)=>{old(t*.6,e);inner.position.y=1.2+Math.sin(t*2)*.15};return g},
+ slimeKing(){const g=new T.Group();const S=new T.Group();S.scale.setScalar(3.6);g.add(S);
+  const jel=new T.Group();S.add(jel);
+  const outer=mesh(new T.SphereGeometry(.74,18,14),M(0x5ce070,{flatShading:false,transparent:true,opacity:.5,roughness:.12,metalness:.05,emissive:0x0c3a14,depthWrite:false}),[0,.5,0]);outer.scale.y=.72;outer.renderOrder=2;jel.add(outer);
+  const rim=mesh(new T.SphereGeometry(.8,16,12),B(0x80ff90,{transparent:true,opacity:.16,side:T.BackSide,blending:T.AdditiveBlending,depthWrite:false}),[0,.5,0],false);rim.scale.y=.72;jel.add(rim);
+  const inner=mesh(new T.SphereGeometry(.56,14,10),M(0x2a9a40,{flatShading:false,transparent:true,opacity:.75,roughness:.3,emissive:0x0a2a10}),[0,.44,0],false);inner.scale.y=.7;jel.add(inner);
+  const core=mesh(new T.IcosahedronGeometry(.2,1),B(0xe6ffb0),[0,.46,0],false);jel.add(core);
+  const coreGlow=mesh(new T.SphereGeometry(.32,10,8),B(0xa0ff70,{transparent:true,opacity:.35,blending:T.AdditiveBlending,depthWrite:false}),[0,.46,0],false);jel.add(coreGlow);
+  const bubM=B(0xd8ffd8,{transparent:true,opacity:.55}),bubG=new T.SphereGeometry(.045,6,4);const bubs=[];for(let i=0;i<7;i++){const b=mesh(bubG,bubM,[rnd(-.4,.4),rnd(.2,.7),rnd(-.35,.35)],false);b.userData.o=rnd(0,6);jel.add(b);bubs.push(b)}
+  jel.add(mesh(new T.SphereGeometry(.17,8,6),B(0xffffff,{transparent:true,opacity:.6}),[-.34,.8,.36],false));jel.add(mesh(new T.SphereGeometry(.07,6,4),B(0xffffff,{transparent:true,opacity:.7}),[-.18,.9,.42],false));
+  const pud=mesh(new T.CylinderGeometry(.92,1,.06,18),M(0x48c860,{transparent:true,opacity:.55,roughness:.15,emissive:0x0a3010,flatShading:false}),[0,.03,0],false);S.add(pud);
+  const dripM=M(0x5ce070,{flatShading:false,transparent:true,opacity:.7,roughness:.15,emissive:0x0c3a14}),dripG=new T.SphereGeometry(.13,8,6);for(let i=0;i<7;i++){const a=i/7*Math.PI*2+.3;const d=mesh(dripG,dripM,[Math.cos(a)*.72,.1,Math.sin(a)*.72],false);d.scale.set(1,.6+(i%3)*.2,1);jel.add(d)}
+  const w=B(0xffffff),k=B(0x10140c),sp=B(0xffffff);for(const x of[-.24,.24]){jel.add(mesh(new T.SphereGeometry(.15,10,8),w,[x,.66,.6],false));jel.add(mesh(new T.SphereGeometry(.085,8,6),k,[x,.65,.72],false));jel.add(mesh(new T.SphereGeometry(.03,5,4),sp,[x-.03,.69,.8],false));
+   const br=mesh(new T.BoxGeometry(.22,.045,.04),M(0x14401c),[x*1.05,.84,.64],false);br.rotation.z=x>0?.35:-.35;jel.add(br)}
+  const mo=mesh(new T.TorusGeometry(.12,.025,5,10,Math.PI),B(0x0e3014),[0,.47,.7],false);mo.rotation.z=Math.PI;jel.add(mo);
+  const cr=new T.Group();S.add(cr);const gm=M(0xffc830,{metalness:.85,roughness:.28,emissive:0x3a2200}),gm2=M(0xfff0a0,{metalness:.7,roughness:.2,emissive:0x403010});
+  cr.add(mesh(new T.CylinderGeometry(.3,.33,.13,10,1,true),M(0xffc830,{metalness:.85,roughness:.28,emissive:0x3a2200,side:T.DoubleSide}),[0,0,0]));
+  const ring=new T.Mesh(new T.TorusGeometry(.33,.03,4,14),gm2);ring.rotation.x=Math.PI/2;ring.position.y=-.06;cr.add(ring);
+  const ring2=ring.clone();ring2.scale.setScalar(.92);ring2.position.y=.07;cr.add(ring2);
+  const tipG=new T.SphereGeometry(.035,6,4),gemCols=[0x40c0ff,0x60ff90,0xc060ff];for(let i=0;i<5;i++){const a=i/5*Math.PI*2+Math.PI/2;const x=Math.cos(a)*.3,z=Math.sin(a)*.3;cr.add(mesh(new T.ConeGeometry(.07,.26,4),gm,[x,.19,z],false));cr.add(mesh(tipG,gm2,[x,.33,z],false));
+   if(i)cr.add(mesh(new T.OctahedronGeometry(.035,0),B(gemCols[i%3]),[Math.cos(a+.63)*.335,0,Math.sin(a+.63)*.335],false))}
+  const gem=mesh(new T.OctahedronGeometry(.075,0),B(0xff2a5a),[0,.02,.34],false);gem.scale.y=1.3;cr.add(gem);
+  const gemGlow=mesh(new T.SphereGeometry(.12,8,6),B(0xff4070,{transparent:true,opacity:.35,blending:T.AdditiveBlending,depthWrite:false}),[0,.02,.35],false);cr.add(gemGlow);
+  const orbM=M(0x7cff8a,{flatShading:false,transparent:true,opacity:.7,roughness:.1,emissive:0x1a6a20}),orbG=new T.SphereGeometry(.11,10,8),orbsO=[];for(let i=0;i<4;i++){const o=mesh(orbG,orbM,[0,0,0],false);o.add(mesh(new T.SphereGeometry(.035,5,4),B(0xeaffd0),[0,0,0],false));S.add(o);orbsO.push(o)}
+  const gl=new T.PointLight(0x70ff80,8,9,1.6);gl.position.set(0,1.6,1.2);g.add(gl);
+  g.anim=(t,e)=>{const s=Math.sin(t*5+e.ph),sq=s*.09;jel.scale.set(1+sq,1-sq*1.3,1+sq);const top=(.5+.53*(1-sq*1.3));cr.position.y=top+.02;cr.rotation.z=Math.sin(t*5+e.ph+.6)*.06;cr.rotation.y=Math.sin(t*.7)*.15;
+   const cp=1+Math.sin(t*3.2)*.12;core.scale.setScalar(cp);coreGlow.scale.setScalar(cp*1.1);core.rotation.y=t*1.5;gemGlow.material.opacity=.25+Math.sin(t*4)*.12;pud.scale.set(1+sq*1.2,1,1+sq*1.2);
+   bubs.forEach(b=>{const o=b.userData.o;b.position.y=.2+((t*.25+o)%1)*.55});
+   orbsO.forEach((o,i)=>{const a=t*.9+i*Math.PI/2;o.position.set(Math.cos(a)*1.05,.75+Math.sin(t*2.4+i*1.7)*.18,Math.sin(a)*1.05);const q=1+Math.sin(t*6+i)*.1;o.scale.set(q,2-q,q)});
+   gl.intensity=7+Math.sin(t*3.2)*1.5};return g},
+ batLord(){const g=new T.Group();const S=new T.Group();S.scale.setScalar(3.2);g.add(S);const inner=new T.Group();S.add(inner);
+  const furM=M(0x2a1440,{emissive:0x12061e,roughness:.8}),belM=M(0x6a3a8a,{emissive:0x1a0828}),memM=M(0x3a1660,{side:T.DoubleSide,emissive:0x1c0634,roughness:.6,transparent:true,opacity:.94}),boneM=M(0x170a22,{roughness:.6}),ivM=M(0xeae0cc,{roughness:.5}),ironM=M(0x3a3048,{metalness:.8,roughness:.3,emissive:0x100818});
+  const body=mesh(new T.SphereGeometry(.4,10,8),furM,[0,0,0]);body.scale.set(1,1.15,.9);inner.add(body);
+  const bel=mesh(new T.SphereGeometry(.28,8,6),belM,[0,-.08,.17],false);bel.scale.set(1,1.2,.7);inner.add(bel);
+  const rune=mesh(new T.OctahedronGeometry(.07,0),B(0xff3cc8),[0,.02,.37],false);rune.scale.y=1.6;inner.add(rune);
+  const coll=new T.Mesh(new T.TorusGeometry(.33,.05,4,10),M(0x5a1020,{emissive:0x2a0410}));coll.rotation.x=Math.PI/2+.25;coll.position.y=.3;inner.add(coll);
+  const hd=new T.Group();hd.position.set(0,.5,.06);inner.add(hd);hd.add(mesh(new T.SphereGeometry(.27,10,8),furM,[0,0,0]));hd.add(mesh(new T.SphereGeometry(.13,8,6),belM,[0,-.08,.2],false));
+  for(const s of[-1,1]){const ea=mesh(new T.ConeGeometry(.11,.5,4),furM,[s*.17,.33,-.02],false);ea.rotation.z=-s*.28;hd.add(ea);const ei=mesh(new T.ConeGeometry(.06,.34,3),M(0x8a2a60,{emissive:0x300818}),[s*.165,.3,.03],false);ei.rotation.z=-s*.28;hd.add(ei)}
+  const eyeM=B(0xff1a1a),eyeG=B(0xff3020,{transparent:true,opacity:.4,blending:T.AdditiveBlending,depthWrite:false}),eg=[];for(const x of[-.1,.1]){const ey=mesh(new T.SphereGeometry(.055,7,5),eyeM,[x,.04,.23],false);ey.scale.set(1.3,.75,1);hd.add(ey);const h=mesh(new T.SphereGeometry(.075,8,6),eyeG,[x,.04,.25],false);hd.add(h);eg.push(h);
+   const br=mesh(new T.BoxGeometry(.14,.03,.03),boneM,[x*1.1,.12,.24],false);br.rotation.z=x>0?.45:-.45;hd.add(br)}
+  for(const x of[-.05,.05]){const f=mesh(new T.ConeGeometry(.025,.13,4),ivM,[x,-.15,.26],false);f.rotation.x=Math.PI;hd.add(f)}
+  const cr=new T.Group();cr.position.set(0,.22,0);hd.add(cr);cr.add(mesh(new T.CylinderGeometry(.19,.21,.07,8,1,true),M(0x3a3048,{metalness:.8,roughness:.3,emissive:0x100818,side:T.DoubleSide})));
+  for(let i=0;i<7;i++){const a=i/7*Math.PI*2+Math.PI/2;const sp=mesh(new T.ConeGeometry(.035,i==0?.26:.17,4),ivM,[Math.cos(a)*.19,.1+(i==0?.05:0),Math.sin(a)*.19],false);sp.rotation.set(Math.sin(a)*.25,0,-Math.cos(a)*.25);cr.add(sp)}
+  cr.add(mesh(new T.OctahedronGeometry(.045,0),B(0xff2040),[0,.01,.21],false));
+  for(const s of[-1,1]){const sh=mesh(new T.ConeGeometry(.07,.3,4),ivM,[s*.36,.32,-.05],false);sh.rotation.z=-s*.9;inner.add(sh);
+   const cl=mesh(new T.ConeGeometry(.05,.18,4),ivM,[s*.14,-.5,.08],false);cl.rotation.x=Math.PI;inner.add(cl)}
+  const ws=new T.Shape();ws.moveTo(0,.12);ws.lineTo(.95,.55);ws.lineTo(1.85,.72);ws.quadraticCurveTo(1.6,.3,1.95,-.05);ws.quadraticCurveTo(1.55,-.15,1.55,-.62);ws.quadraticCurveTo(1.15,-.45,.95,-.85);ws.quadraticCurveTo(.6,-.45,.15,-.45);ws.lineTo(0,-.15);
+  const wGeo=new T.ShapeGeometry(ws,5);const bones=[[.95,.55,1.85,.72],[.95,.55,1.95,-.05],[.95,.55,1.55,-.62],[.95,.55,.95,-.85],[0,.12,.95,.55]];const boneG=new T.CylinderGeometry(.022,.012,1,4);boneG.translate(0,.5,0);
+  const veinM=B(0xb040ff,{transparent:true,opacity:.55,blending:T.AdditiveBlending,depthWrite:false}),wings=[];
+  for(const s of[-1,1]){const p=new T.Group();p.position.set(s*.3,.2,-.06);inner.add(p);const wg=new T.Group();wg.scale.x=s;p.add(wg);const m=mesh(wGeo,memM,[0,0,0]);wg.add(m);
+   for(const[x1,y1,x2,y2]of bones){const b=new T.Mesh(boneG,boneM);b.position.set(x1,y1,.01);b.scale.y=Math.hypot(x2-x1,y2-y1);b.rotation.z=Math.atan2(y2-y1,x2-x1)-Math.PI/2;wg.add(b);
+    const v=new T.Mesh(boneG,veinM);v.position.set(x1,y1,.025);v.scale.set(.6,Math.hypot(x2-x1,y2-y1)*.9,.6);v.rotation.z=b.rotation.z;wg.add(v)}
+   const cl=mesh(new T.ConeGeometry(.04,.14,4),ivM,[.95,.62,0],false);wg.add(cl);wings.push([p,s])}
+  const NA=60,ap=new Float32Array(NA*3),as=[];for(let i=0;i<NA;i++)as.push([rnd(0,6.3),rnd(1,3),rnd(0,6),rnd(-.6,.6)]);
+  const aG=new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(ap,3));const au=new T.Points(aG,new T.PointsMaterial({map:dot,color:0xa040ff,size:.55,blending:T.AdditiveBlending,transparent:true,opacity:.8,depthWrite:false}));g.add(au);
+  const au2=new T.Points(aG,new T.PointsMaterial({map:dot,color:0x14001e,size:.9,transparent:true,opacity:.55,depthWrite:false}));g.add(au2);
+  const ll=new T.PointLight(0xb060ff,14,11,1.5);ll.position.set(0,5,2.2);g.add(ll);
+  g.anim=(t,e)=>{const f=Math.sin(t*6.5+e.ph);wings.forEach(([p,s])=>{p.rotation.z=s*(f*.6+.1);p.rotation.y=-s*(.25+Math.cos(t*6.5+e.ph)*.15)});inner.position.y=1.2+Math.sin(t*2)*.15-f*.04;inner.rotation.x=Math.sin(t*2)*.05;
+   hd.rotation.z=Math.sin(t*1.3)*.08;const ep=.28+Math.sin(t*5)*.1;eg.forEach(h=>h.material.opacity=ep);rune.rotation.y=t*2;
+   const cy=inner.position.y*3.2,pa=aG.attributes.position;for(let i=0;i<NA;i++){const[a,r,o,dy]=as[i];const k=(t*.35+o/6)%1,aa=a+t*.8+k*2;pa.setXYZ(i,Math.cos(aa)*r*(1+k*.4),cy+dy*2+(k-.5)*2.5,Math.sin(aa)*r*(1+k*.4))}pa.needsUpdate=true};return g},
  alphaWolf(){const g=MODELS.wolf(0x4a5670);g.add((l=>{l.position.set(0,1.2,1.6);return l})(new T.PointLight(0x40c0ff,12,6)));g.scale.setScalar(2.6);const mane=M(0x9aa6c0);g.add(mesh(new T.DodecahedronGeometry(.55,0),mane,[0,1.15,.55]));
   eyes(g,0x60e0ff,1.16,1.3,.13,.085);for(let i=0;i<4;i++){const q=mesh(new T.ConeGeometry(.08,.4,4),M(0x80c0ff,{emissive:0x2050a0}),[0,1.15+i*.02,.3-i*.3]);q.rotation.x=-.3;g.add(q)}return g},
  demon(){const g=new T.Group();const bb=new T.Group();bb.scale.setScalar(1.9);g.add(bb);
