@@ -80460,7 +80460,14 @@ function groundTex(st){const c=document.createElement('canvas');c.width=c.height
   for(let i=0;i<9;i++){let px=R(40,472),py=R(40,472),an=R(0,6.28);const steps=8+(i%6);W(()=>{x.globalAlpha=.22;x.fillStyle='#9aacbe';
     for(let k=0;k<steps;k++){const side=k%2?1:-1,ox=Math.cos(an+1.57)*side*3.2,oy=Math.sin(an+1.57)*side*3.2;x.beginPath();x.ellipse(px+ox,py+oy,R(2.2,3.4),R(1.4,2.2),an,0,7);x.fill();an+=R(-.25,.25);px+=Math.cos(an)*R(9,14);py+=Math.sin(an)*R(9,14)}})}
   for(let i=0;i<320;i++){x.globalAlpha=R(.12,.35);x.fillStyle=i%5?hex(base.clone().multiplyScalar(R(1.05,1.25))):'#ffffff';x.beginPath();x.arc(R(0,512),R(0,512),R(.6,2.2),0,7);x.fill()}}
- x.globalAlpha=st.props=='cave'?.035:.10;x.strokeStyle='#'+new T.Color(st.ring).getHexString();x.lineWidth=2;for(let i=0;i<=512;i+=64){x.beginPath();x.moveTo(i,0);x.lineTo(i,512);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(512,i);x.stroke()}
+ if(st.props=='desert'){let s=5521;const r=()=>((s=s*16807%2147483647)/2147483647),R=(a,b)=>a+r()*(b-a);const W=f=>{for(const dx of[-512,0,512])for(const dy of[-512,0,512]){x.save();x.translate(dx,dy);f();x.restore()}};const hex=c=>'#'+c.getHexString();
+  for(let i=0;i<14;i++){const cx=R(0,512),cy=R(0,512),rr=R(40,110);W(()=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,rr);g.addColorStop(0,'rgba(160,100,40,.22)');g.addColorStop(.55,'rgba(200,140,60,.08)');g.addColorStop(1,'rgba(200,140,60,0)');x.globalAlpha=1;x.fillStyle=g;x.beginPath();x.arc(cx,cy,rr,0,7);x.fill()})}
+  for(let i=0;i<28;i++){const cx=R(0,512),cy=R(0,512),rx=R(30,90),ry=R(10,28),an=R(-.4,.4);const col=base.clone().lerp(new T.Color(i%3?0xc09050:0xe8c888),R(.2,.55)).multiplyScalar(R(.9,1.12));W(()=>{x.globalAlpha=.32;x.fillStyle=hex(col);x.beginPath();x.ellipse(cx,cy,rx,ry,an,0,7);x.fill()})}
+  for(let i=0;i<55;i++){let px=R(0,512),py=R(0,512),an=R(-.35,.35)+((i%2)?Math.PI:0);const L=R(40,120),w=R(1.2,3.5);W(()=>{x.globalAlpha=R(.12,.28);x.strokeStyle=hex(base.clone().lerp(new T.Color(0xa07038),.4).multiplyScalar(R(.85,1.15)));x.lineWidth=w;x.lineCap='round';x.beginPath();x.moveTo(px,py);x.quadraticCurveTo(px+Math.cos(an)*L*.5+R(-8,8),py+Math.sin(an)*L*.5+R(-6,6),px+Math.cos(an)*L,py+Math.sin(an)*L);x.stroke()})}
+  for(let i=0;i<18;i++){const cx=R(0,512),cy=R(0,512),rr=R(8,22),n=5+(i%3),pts=[];for(let k=0;k<n;k++){const a=k/n*6.283+R(-.2,.2),q=rr*R(.7,1.15);pts.push([cx+Math.cos(a)*q,cy+Math.sin(a)*q*R(.65,1)])}
+   W(()=>{x.globalAlpha=.28;x.fillStyle=hex(base.clone().lerp(new T.Color(0x8a6030),.35).multiplyScalar(R(.85,1.1)));x.beginPath();pts.forEach((q,k)=>k?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]));x.closePath();x.fill()})}
+  for(let i=0;i<280;i++){x.globalAlpha=R(.15,.4);x.fillStyle=i%6?hex(base.clone().multiplyScalar(R(.95,1.2))):'#f0d8a0';x.beginPath();x.arc(R(0,512),R(0,512),R(.5,2.4),0,7);x.fill()}}
+ x.globalAlpha=st.props=='cave'?.035:st.props=='desert'?.06:.10;x.strokeStyle='#'+new T.Color(st.ring).getHexString();x.lineWidth=2;for(let i=0;i<=512;i+=64){x.beginPath();x.moveTo(i,0);x.lineTo(i,512);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(512,i);x.stroke()}
  x.globalAlpha=1;const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(7,7);t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;return t}
 // pass8: forest in-arena obstacles = merged vertex-colored compound geometries (1 InstancedMesh per variant), own PRNG so global seed/positions unchanged
 function mkForestOB(){let s=9137;const r=()=>((s=s*16807%2147483647)/2147483647),R=(a,b)=>a+r()*(b-a);
@@ -80697,6 +80704,109 @@ function buildSnow(st){const K=snowKit(8819),{r,R,P,MG,snowCap,pine,xtal,lerpC}=
  // cheap soft ice light (north edge, no shadow)
  {const L=new T.PointLight(0xa0d0ff,6,16,1.5);L.position.set(3,2.4,-(ARENA+1.2));arena.add(L)}
 }
+// pass11: Sa Mạc Cát desert — merged vertex-color geometry, own PRNG (global seed untouched)
+function desertKit(s){const r=()=>((s=s*16807%2147483647)/2147483647),R=(a,b)=>a+r()*(b-a);
+ const P=(g,col,pos=[0,0,0],rot=[0,0,0],scl=[1,1,1],jit=0)=>{g=g.index?g.toNonIndexed():g;['uv','normal'].forEach(a=>g.attributes[a]&&g.deleteAttribute(a));const p=g.attributes.position;
+  if(jit)for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),h=Math.sin(x*12.9898+y*78.233+z*37.719)*43758.5453,f=1+((h-Math.floor(h))-.5)*jit;p.setXYZ(i,x*f,y*f,z*f)}
+  g.scale(...scl);g.rotateX(rot[0]);g.rotateZ(rot[2]);g.rotateY(rot[1]);g.translate(...pos);const c=new T.Color(col),ca=new Float32Array(p.count*3);
+  for(let i=0;i<p.count;i++){ca[i*3]=c.r;ca[i*3+1]=c.g;ca[i*3+2]=c.b}g.setAttribute('color',new T.BufferAttribute(ca,3));return g};
+ const MG=parts=>{let n=0;parts.forEach(g=>n+=g.attributes.position.count);const pos=new Float32Array(n*3),col=new Float32Array(n*3);let o=0;
+  parts.forEach(g=>{pos.set(g.attributes.position.array,o*3);col.set(g.attributes.color.array,o*3);o+=g.attributes.position.count;g.dispose()});
+  const m=new T.BufferGeometry();m.setAttribute('position',new T.BufferAttribute(pos,3));m.setAttribute('color',new T.BufferAttribute(col,3));m.computeVertexNormals();return m};
+ const lerpC=(a,b,t)=>new T.Color(a).lerp(new T.Color(b),t).getHex();
+ const cactus=(cx,cz,k,col=0x3a7a38)=>{const a=[P(new T.CylinderGeometry(.18*k,.22*k,2.4*k,7),col,[cx,1.2*k,cz],[0,0,0],[1,1,1],.06),P(new T.SphereGeometry(.18*k,6,4),col,[cx,2.4*k,cz])];
+  for(const side of[-1,1]){const ay=R(1.1,1.5)*k,alen=R(.7,1.1)*k;a.push(P(new T.CylinderGeometry(.1*k,.12*k,alen,6),col,[cx+side*.28*k,ay,cz],[0,0,-side*.85]));
+   a.push(P(new T.CylinderGeometry(.1*k,.1*k,alen*.55,6),col,[cx+side*(.28*k+alen*.35),ay+alen*.25,cz]));a.push(P(new T.SphereGeometry(.1*k,5,3),col,[cx+side*(.28*k+alen*.35),ay+alen*.52,cz]))}
+  return a};
+ const barrel=(cx,cz,k,col=0x4a8a40)=>[P(new T.SphereGeometry(.55*k,8,6),col,[cx,.5*k,cz],[0,0,0],[.85,1.15,.85],.08),P(new T.ConeGeometry(.08*k,.25*k,5),0xc8b070,[cx,1.05*k,cz]),
+  P(new T.ConeGeometry(.06*k,.18*k,4),0xc8b070,[cx+.12*k,.95*k,cz+.05*k],[.3,0,.2]),P(new T.ConeGeometry(.06*k,.18*k,4),0xc8b070,[cx-.1*k,.92*k,cz-.08*k],[-.25,0,-.2])];
+ const pear=(cx,cz,k,col=0x508a38)=>{const a=[P(new T.SphereGeometry(.28*k,7,5),col,[cx,.28*k,cz],[0,0,0],[1.1,.7,1],.1)];
+  for(let i=0;i<4;i++){const an=i/4*6.283+R(-.2,.2),h=R(.35,.55)*k;a.push(P(new T.SphereGeometry(.2*k,6,4),i%2?col:0x3a7030,[cx+Math.cos(an)*.28*k,h,cz+Math.sin(an)*.28*k],[0,0,0],[1.1,.55,1],.1));
+   if(i<2)a.push(P(new T.SphereGeometry(.14*k,5,3),0xd84040,[cx+Math.cos(an)*.35*k,h+.12*k,cz+Math.sin(an)*.35*k],[0,0,0],[1,.6,1]))}
+  return a};
+ const shrub=(cx,cz,k,col=0x8a6a38)=>{const a=[];for(let i=0;i<5;i++){const an=i/5*6.283+R(-.3,.3);a.push(P(new T.ConeGeometry(.12*k,.55*k,4),col,[cx+Math.cos(an)*.15*k,.25*k,cz+Math.sin(an)*.15*k],[Math.sin(an)*.4,0,-Math.cos(an)*.4],[1,1,1],.12))}
+  a.push(P(new T.SphereGeometry(.35*k,6,4),0x7a5a30,[cx,.15*k,cz],[0,0,0],[1.2,.35,1.1],.2));return a};
+ const bone=(cx,cz)=>{const a=[P(new T.CylinderGeometry(.06,.07,.7,5),0xe8dcc8,[cx,.12,cz],[1.2,0,.3]),P(new T.SphereGeometry(.1,5,3),0xe0d4bc,[cx-.28,.18,cz-.08]),P(new T.SphereGeometry(.1,5,3),0xe0d4bc,[cx+.28,.08,cz+.1])];return a};
+ const skull=(cx,cz)=>[P(new T.SphereGeometry(.28,7,5),0xece4d0,[cx,.28,cz],[0,0,0],[1,.85,1.05],.08),P(new T.SphereGeometry(.08,5,3),0x1a1410,[cx-.1,.32,cz+.18]),P(new T.SphereGeometry(.08,5,3),0x1a1410,[cx+.1,.32,cz+.18]),
+  P(new T.BoxGeometry(.12,.08,.06),0xd8ccb0,[cx,.18,cz+.22]),P(new T.SphereGeometry(.16,5,3),0xe0d4bc,[cx,.12,cz-.12],[0,0,0],[.8,.5,1])];
+ const strata=(cx,y,cz,w,h,cols)=>{const a=[];const n=cols.length;for(let i=0;i<n;i++){const yy=y+i*(h/n)+h/(n*2);a.push(P(new T.BoxGeometry(w,h/n*1.05,w*.95),cols[i],[cx,yy,cz],[0,R(0,.2),0],[1,1,1],.04))}return a};
+ return {r,R,P,MG,lerpC,cactus,barrel,pear,shrub,bone,skull,strata}}
+function mkDesertOB(){const K=desertKit(6307),{R,P,MG,cactus,barrel,pear,lerpC}=K;
+ const sand=[0xb08050,0xc09058,0xa07040,0xd0a868],rock=[0xc89858,0xd8b070,0xb88848,0xe0c080],cact=0x3a7a38;
+ const floor=(rr,col=0xc8a060)=>P(new T.CircleGeometry(rr,11),col,[0,.02,0],[-Math.PI/2,0,0],[1,1,1],.12);
+ // A: sandstone rock outcrop with strata bands (r~1.3)
+ const A=MG([floor(1.55),P(new T.DodecahedronGeometry(1,0),sand[0],[0,.55,0],[0,.4,0],[1.25,.85,1.1],.3),P(new T.DodecahedronGeometry(.55,0),sand[1],[.9,.32,.35],[.3,1,0],[1,.75,1],.28),
+  P(new T.DodecahedronGeometry(.48,0),sand[2],[-.75,.28,.65],[0,2,.2],[1,.7,1.05],.28),P(new T.DodecahedronGeometry(.4,0),sand[3],[-.2,.95,-.5],[.15,.5,.2],[.7,1.2,.75],.25),
+  P(new T.BoxGeometry(1.6,.12,1.3),rock[1],[0,.72,0],[0,.2,0],[1,1,1],.05),P(new T.BoxGeometry(1.3,.1,1.1),rock[2],[0,.95,0],[0,-.15,0],[1,1,1],.05),
+  P(new T.DodecahedronGeometry(.28,0),sand[1],[1.05,.12,-.35],[0,1,0],[1,.5,1],.3),...barrel(.55,.7,.45),P(new T.ConeGeometry(.04,.2,4),0xc8b070,[-.9,.55,.4])]);
+ // B: half-buried ruin pillar / sandstone stump (r~1.3)
+ const B=MG([floor(1.5),P(new T.CylinderGeometry(.55,.7,1.4,8),rock[0],[0,.55,0],[0,0,0],[1,1,1],.06),P(new T.CylinderGeometry(.7,.72,.18,8),rock[1],[0,1.25,0]),
+  P(new T.CylinderGeometry(.48,.5,.15,8),rock[2],[0,1.4,0]),P(new T.BoxGeometry(.15,.5,.15),rock[3],[.35,1.65,0],[.1,0,.15]),P(new T.BoxGeometry(.12,.35,.12),rock[1],[-.3,1.55,.2],[-.15,0,-.1]),
+  P(new T.SphereGeometry(.9,7,4),sand[1],[0,.15,0],[0,0,0],[1.5,.3,1.3],.2),P(new T.DodecahedronGeometry(.4,0),sand[0],[-.95,.2,-.4],[0,1,0],[1,.55,1],.3),
+  P(new T.DodecahedronGeometry(.32,0),sand[2],[.85,.15,.5],[0,2,0],[1,.5,1],.3),P(new T.BoxGeometry(.5,.08,.35),0xd8c8a0,[.6,.35,-.7],[0,.5,0]),
+  ...pear(-.7,.6,.5)]);
+ // C: saguaro cactus (r~.6)
+ const C=MG([floor(.85,0xb89050),...cactus(0,0,.85),P(new T.DodecahedronGeometry(.22,0),sand[1],[.4,.08,-.25],[0,1,0],[1,.45,1],.3),
+  P(new T.SphereGeometry(.3,6,3),0x8a6a38,[-.35,.08,.3],[0,0,0],[1.1,.3,1],.15),P(new T.ConeGeometry(.03,.15,4),0xc8b070,[.12,2.15,0])]);
+ // D: barrel + prickly pear cluster (r~.6)
+ const D=MG([floor(.85,0xc09858),...barrel(0,0,.9),...pear(.35,-.25,.55),P(new T.DodecahedronGeometry(.25,0),sand[0],[-.4,.1,.3],[0,1.5,0],[1,.5,1],.3),
+  P(new T.SphereGeometry(.28,5,3),0x7a5a30,[.45,.06,.35],[0,0,0],[1.2,.28,1],.15),P(new T.CylinderGeometry(.04,.05,.35,4),0xe8dcc8,[-.35,.08,-.35],[1.1,0,.4])]);
+ return [[[A,B],0xffffff,1.3,[0,0,0]],[[C,D],0xffffff,.6,[0,0,0]]]}
+function buildDesert(st){const K=desertKit(9023),{r,R,P,MG,lerpC,cactus,barrel,pear,shrub,bone,skull,strata}=K,d=new T.Object3D(),tc=new T.Color();
+ const mat=M(0xffffff,{vertexColors:true,roughness:.92}),sand=[0xb08050,0xc09058,0xa07040,0xd0a868],rock=[0xc89858,0xd8b070,0xb88848,0xe0c080],cact=[0x3a7a38,0x4a8a40,0x2e6830];
+ // instanced cacti (saguaro / barrel / pear) outside + near ring + light wind sway on tall ones
+ {const sA=MG([...cactus(0,0,1.15),P(new T.DodecahedronGeometry(.2,0),sand[1],[.35,.08,-.2],[0,0,0],[1,.4,1],.3)]),
+   sB=MG([...barrel(0,0,1.2),...pear(.45,0,.5)]),
+   sC=MG([...cactus(0,0,.9),...barrel(-.4,.3,.55),P(new T.SphereGeometry(.25,5,3),0x8a6a38,[.3,.06,.25],[0,0,0],[1.1,.3,1],.15)]);
+  const mkWind=m=>{m.onBeforeCompile=sh=>{sh.uniforms.uW={value:0};sh.vertexShader='uniform float uW;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfloat _wh=max(transformed.y,0.);transformed.x+=sin(uW*1.4+instanceMatrix[3][0]*.28)*_wh*.07;transformed.z+=cos(uW*1.1+instanceMatrix[3][2]*.28)*_wh*.055;');m.userData._ws=sh};swayMats.push(m);return m};
+  const wMat=mkWind(M(0xffffff,{vertexColors:true,roughness:.9}));
+  [sA,sB,sC].forEach((g,k)=>{const im=new T.InstancedMesh(g,k?mat:wMat,22);let c=0;for(let i=0;i<30&&c<22;i++){const a=R(0,6.283),rr=ARENA+R(1.0,k?20:26);d.position.set(Math.cos(a)*rr,0,Math.sin(a)*rr);d.rotation.set(R(-.03,.03),R(0,6.3),R(-.03,.03));const s=R(.75,1.55);d.scale.set(s,s*R(.9,1.15),s);d.updateMatrix();im.setMatrixAt(c,d.matrix);const v=R(.88,1.12);im.setColorAt(c++,tc.setRGB(v,v*.98,v*.9))}
+   im.count=c;im.castShadow=true;arena.add(im)})}
+ // background mesas / sandstone cliffs with strata (~r 38–48)
+ {const parts=[];const cols=[0xb88848,0xc89858,0xd0a868,0xa87840,0xe0b878];
+  for(let i=0;i<9;i++){const a=i/9*6.283+R(-.1,.1),rr=R(38,48),h=R(8,16),w=R(5,10);
+   parts.push(...strata(Math.cos(a)*rr,0,Math.sin(a)*rr,w,h,cols.map((c,j)=>lerpC(c,rock[j%4],R(0,.3)))));
+   parts.push(P(new T.BoxGeometry(w*1.05,.35,w),rock[3],[Math.cos(a)*rr,h+.15,Math.sin(a)*rr],[0,R(0,.3),0]));
+   if(i%2==0){const a2=a+R(.12,.3),rr2=rr+R(-2,3),h2=h*R(.45,.7),w2=w*R(.45,.7);parts.push(...strata(Math.cos(a2)*rr2,0,Math.sin(a2)*rr2,w2,h2,[cols[1],cols[2],cols[0]]))}}
+  arena.add(new T.Mesh(MG(parts),mat))}
+ // outer layered dunes
+ {const parts=[];for(let i=0;i<14;i++){const a=R(0,6.283),rr=R(ARENA+7,40),s=R(4,10);parts.push(P(new T.SphereGeometry(s,7,5),lerpC(st.ground,0xc09050,.35),[Math.cos(a)*rr,-s*.5,Math.sin(a)*rr],[0,R(0,1),0],[1.3,R(.22,.4),1],.12));
+  if(i%3==0)parts.push(P(new T.SphereGeometry(s*.55,6,4),lerpC(st.ground,0xe8c888,.4),[Math.cos(a)*rr+R(-2,2),-s*.25,Math.sin(a)*rr+R(-2,2)],[0,0,0],[1.2,R(.2,.35),1],.1))}
+  arena.add(new T.Mesh(MG(parts),mat))}
+ // in-arena sand drifts + small rocks
+ {const parts=[];for(let i=0;i<14;i++){const a=R(0,6.283),rr=R(5,ARENA-2.5),s=R(.45,1.3);parts.push(P(new T.SphereGeometry(s,7,4),sand[i%4],[Math.cos(a)*rr,-.12,Math.sin(a)*rr],[0,R(0,3),0],[R(1.2,1.7),.3,R(1,1.5)],.18))}
+  for(let i=0;i<10;i++){const a=R(0,6.283),rr=R(6,ARENA-2),s=R(.3,.75);parts.push(P(new T.DodecahedronGeometry(s,0),sand[i%4],[Math.cos(a)*rr,s*.25,Math.sin(a)*rr],[R(0,1),R(0,3),0],[1,R(.5,.8),1],.28))}
+  arena.add(new T.Mesh(MG(parts),mat))}
+ // dry shrubs + tumbleweeds near ring
+ {const parts=[];for(let i=0;i<16;i++){const a=R(0,6.283),rr=ARENA+R(.5,8);parts.push(...shrub(Math.cos(a)*rr,Math.sin(a)*rr,R(.7,1.3),i%2?0x8a6a38:0x7a5a28))}
+  for(let i=0;i<8;i++){const a=R(0,6.283),rr=R(ARENA-10,ARENA-1.5);parts.push(P(new T.IcosahedronGeometry(R(.25,.45),0),0x9a7840,[Math.cos(a)*rr,R(.2,.4),Math.sin(a)*rr],[0,0,0],[1,1,1],.25))}
+  arena.add(new T.Mesh(MG(parts),mat))}
+ // bleached bones / skulls in arena
+ {const parts=[];for(let i=0;i<6;i++){const a=R(0,6.283),rr=R(8,ARENA-3),x=Math.cos(a)*rr,z=Math.sin(a)*rr;if(i%2)parts.push(...skull(x,z));else parts.push(...bone(x,z));
+   if(i%3==0)parts.push(...bone(x+R(-.6,.6),z+R(-.6,.6)))}
+  arena.add(new T.Mesh(MG(parts),mat))}
+ // half-buried ruins / pillars near ring edge
+ {const parts=[];const cols=[0xc89858,0xd8b070,0xb88848,0xe0c080];
+  for(let i=0;i<7;i++){const a=i/7*6.283+.2,rr=ARENA+R(1.5,4),h=R(2.2,4.5),w=R(.7,1.2);
+   parts.push(...strata(Math.cos(a)*rr,0,Math.sin(a)*rr,w,h,cols));
+   parts.push(P(new T.SphereGeometry(w*.9,6,4),sand[i%4],[Math.cos(a)*rr,.1,Math.sin(a)*rr],[0,0,0],[1.4,.35,1.3],.2));
+   if(i%2==0){const ang=R(.4,1.1);parts.push(P(new T.BoxGeometry(w*.7,h*.55,w*.7),rock[i%4],[Math.cos(a+ang)*(rr+.8),h*.2,Math.sin(a+ang)*(rr+.8)],[R(.5,1.2),R(0,1),R(.2,.6)]))}}
+  arena.add(new T.Mesh(MG(parts),mat))}
+ // small oasis outside ring (water + palms/cacti rim)
+ {const oa=R(0,6.283),orr=ARENA+R(5,9),ox=Math.cos(oa)*orr,oz=Math.sin(oa)*orr;
+  const wM=new T.MeshStandardMaterial({color:0x3a8aaa,roughness:.15,metalness:.25,transparent:true,opacity:.72,emissive:0x104050,emissiveIntensity:.12});
+  const w=new T.Mesh(new T.CircleGeometry(2.4,18),wM);w.rotation.x=-Math.PI/2;w.position.set(ox,.04,oz);arena.add(w);
+  const rim=new T.Mesh(new T.RingGeometry(2.1,2.55,18),M(0xa88850,{transparent:true,opacity:.55,roughness:.7}));rim.rotation.x=-Math.PI/2;rim.position.set(ox,.045,oz);arena.add(rim);
+  const parts=[];for(let i=0;i<8;i++){const aa=i/8*6.283+R(-.15,.15),rr=2.4+R(-.2,.4);parts.push(P(new T.DodecahedronGeometry(R(.2,.45),0),sand[i%4],[ox+Math.cos(aa)*rr,.12,oz+Math.sin(aa)*rr],[0,R(0,2),0],[1,R(.5,.8),1],.28))}
+  for(let i=0;i<4;i++){const aa=i/4*6.283+R(-.2,.2),rr=3.1+R(0,.6);parts.push(...cactus(ox+Math.cos(aa)*rr,oz+Math.sin(aa)*rr,R(.7,1.1),cact[i%3]));parts.push(...shrub(ox+Math.cos(aa+1)*rr*.9,oz+Math.sin(aa+1)*rr*.9,.8,0x5a8a38))}
+  arena.add(new T.Mesh(MG(parts),mat))}
+ // blowing sand particles (cheap Points, drift in animate via dust2-like float — use existing particles color already sandy)
+ {const n=90,pp=new Float32Array(n*3);for(let i=0;i<n;i++){pp[i*3]=R(-ARENA,ARENA);pp[i*3+1]=R(.3,4);pp[i*3+2]=R(-ARENA,ARENA)}
+  const sandP=new T.Points(new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(pp,3)),new T.PointsMaterial({map:dot,color:0xe8c888,size:.18,transparent:true,opacity:.55,depthWrite:false,blending:T.AdditiveBlending}));
+  sandP.mode='float';arena.add(sandP)}
+ // cheap warm sun shaft light near south-east edge (no shadow)
+ {const L=new T.PointLight(0xffc070,5.5,15,1.5);L.position.set(ARENA*.55,2.6,ARENA*.35);arena.add(L)}
+}
 function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geometry.dispose()});arena=new T.Group();S.add(arena);fires=[];sway=[];swayMats=[];seed=7+st.idx*13;
  S.background=new T.Color(st.bg);S.fog=new T.Fog(st.fog[0],st.fog[1]*1.3,st.fog[2]*1.5);hemi.color.set(st.hemi[0]);hemi.groundColor.set(st.hemi[1]);hemi.intensity=st.hemi[2];
  key.color.set(st.key[0]);key.intensity=st.key[1]*1.2;rim.color.set(st.rim[0]);rim.intensity=st.rim[1]*1.5;R.toneMappingExposure=1.15;
@@ -80745,12 +80855,7 @@ function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geome
  if(p=='cave'){const s0=seed;buildCave(st);seed=s0;for(let i=0;i<202;i++)rand()}// pass9: own PRNG, then advance global seed exactly as the old cave block did (obstacle positions unchanged)
  if(p=='snow'){const s0=seed;buildSnow(st);seed=s0;for(let i=0;i<156;i++)rand()}// pass10: own PRNG, then advance global seed exactly as the old snow block did (obstacle positions unchanged)
 
- if(p=='desert'){const cm=M(0x4a8a3a),sm=M(0xc89858),pm=M(0xd8b880);
-  for(let i=0;i<18;i++){const a=rnd(0,6.28),r=rnd(ARENA+1,28),g=new T.Group();g.position.set(Math.cos(a)*r,0,Math.sin(a)*r);g.add(mesh(new T.CylinderGeometry(.35,.4,3,6),cm,[0,1.5,0],false));
-   for(const s2 of[-1,1]){const ar=mesh(new T.CylinderGeometry(.22,.22,1.2,6),cm,[s2*.6,1.8,0],false);g.add(ar)}arena.add(g)}
-  for(let i=0;i<10;i++){const a=rnd(0,6.28),d=mesh(new T.SphereGeometry(rnd(5,10),8,5),sm,[Math.cos(a)*rnd(26,40),-2,Math.sin(a)*rnd(26,40)],false);d.scale.y=.4;arena.add(d)}
-  for(let i=0;i<6;i++){const a=i/6*6.28+.3;arena.add(mesh(new T.BoxGeometry(1.2,rnd(3,6),1.2),pm,[Math.cos(a)*(ARENA+2),2,Math.sin(a)*(ARENA+2)],false))}
-  for(let i=0;i<8;i++)arena.add(mesh(new T.DodecahedronGeometry(rnd(.4,1),0),sm,[rnd(-ARENA+2,ARENA-2),.2,rnd(-ARENA+2,ARENA-2)],false))}
+ if(p=='desert'){const s0=seed;buildDesert(st);seed=s0;for(let i=0;i<106;i++)rand()}// pass11: own PRNG, then advance global seed exactly as the old desert block did (obstacle positions unchanged)
  if(p=='swamp'){const tm=M(0x3a2a1a),tm2=M(0x2a1a10),wm=B(0x2a5a28,{transparent:true,opacity:.72}),wm2=B(0x1a4020,{transparent:true,opacity:.45});
   const lm=M(0x5aa040),lm2=M(0x3a7030),moss=M(0x4a6830,{transparent:true,opacity:.85}),reed=M(0x4a6a28),rockM=M(0x4a5a3a);
   const mkWind=mat=>{mat.onBeforeCompile=sh=>{sh.uniforms.uW={value:0};sh.vertexShader='uniform float uW;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfloat _wh=max(transformed.y,0.);transformed.x+=sin(uW*1.4+instanceMatrix[3][0]*.4)*_wh*.14;transformed.z+=cos(uW*1.1+instanceMatrix[3][2]*.4)*_wh*.11;');mat.userData._ws=sh};swayMats.push(mat);return mat};
@@ -80791,7 +80896,7 @@ function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geome
    g.add(mesh(new T.CylinderGeometry(.7,.9,h,6),pm,[0,h/2,0],false));if(i%2==0){const f=mesh(new T.ConeGeometry(.45,1.2,6),fm,[0,h+.6,0],false);g.add(f);fires.push(f)}arena.add(g)}
   for(let i=0;i<8;i++){const a=rnd(0,6.3);arena.add(mesh(new T.BoxGeometry(rnd(3,6),rnd(8,16),rnd(3,6)),M(0x1d1a26),[Math.cos(a)*rnd(26,36),4,Math.sin(a)*rnd(26,36)],false))}}
  obs=[];const OB={forest:p=='forest'?mkForestOB():null,cave:p=='cave'?mkCaveOB():null,
-  snow:p=='snow'?mkSnowOB():null,desert:[[new T.DodecahedronGeometry(1.3,0),0xb08050,1.3,[0,.6,0]],[new T.CylinderGeometry(.35,.4,2.6,6),0x4a8a3a,.6,[0,1.3,0]]],
+  snow:p=='snow'?mkSnowOB():null,desert:p=='desert'?mkDesertOB():null,
   swamp:[[new T.CylinderGeometry(.25,.6,4,5),0x3a2a1a,.7,[0,2,0]],[new T.DodecahedronGeometry(1,0),0x4a5a3a,1,[0,.4,0]]],volcano:[[new T.ConeGeometry(1.3,4.5,5),0x2a1a18,1.2,[0,2.2,0]],[new T.DodecahedronGeometry(1,0),0x3a2a24,1,[0,.5,0]]],
   grave:[[new T.BoxGeometry(1.4,2,.5),0x6a7078,.9,[0,1,0]],[new T.CylinderGeometry(.2,.45,4.5,5),0x2a2420,.6,[0,2.2,0]]],castle:[[new T.CylinderGeometry(.9,1.1,6,6),0x3a3646,1.1,[0,3,0]],[new T.BoxGeometry(1.8,1.2,1.8),0x2a2632,1.2,[0,.6,0]]]}[p];
  const NOB=34,dm=new T.Object3D(),tc=new T.Color();OB.forEach(([geo,col,rad,off,glow],k)=>{const vs=Array.isArray(geo)?geo.map(g=>{const v=new T.InstancedMesh(g,glow&&glow.isMaterial?glow:M(0xffffff,{vertexColors:true,roughness:.92}),NOB/2);v.castShadow=true;v.receiveShadow=true;v.count=0;return v}):null;const im=vs?null:new T.InstancedMesh(geo,glow?B(col):M(col),NOB/2);if(im)im.castShadow=true;let c=0,tries=0;
