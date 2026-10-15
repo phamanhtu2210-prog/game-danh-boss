@@ -80504,7 +80504,29 @@ function groundTex(st){const c=document.createElement('canvas');c.width=c.height
    W(()=>{x.globalAlpha=.22;x.fillStyle=hex(col);x.beginPath();x.ellipse(cx,cy,rx,ry,an,0,7);x.fill()})}
   for(let i=0;i<14;i++){const cx=R(0,512),cy=R(0,512),rr=R(16,45);W(()=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,rr);g.addColorStop(0,'rgba(80,180,160,.1)');g.addColorStop(.5,'rgba(60,120,110,.04)');g.addColorStop(1,'rgba(60,120,110,0)');x.globalAlpha=1;x.fillStyle=g;x.beginPath();x.arc(cx,cy,rr,0,7);x.fill()})}
   for(let i=0;i<260;i++){const k=i%8;x.globalAlpha=k==0?.35:R(.1,.28);x.fillStyle=k==0?'#60ffd0':k==1?'#3a5a38':hex(base.clone().multiplyScalar(R(.7,1.2)));x.beginPath();x.arc(R(0,512),R(0,512),k==0?R(.5,1.4):R(.7,2.4),0,7);x.fill()}}
- x.globalAlpha=st.props=='cave'?.035:st.props=='desert'?.06:st.props=='swamp'?.03:st.props=='volcano'?.04:st.props=='grave'?.035:.10;x.strokeStyle='#'+new T.Color(st.ring).getHexString();x.lineWidth=2;for(let i=0;i<=512;i+=64){x.beginPath();x.moveTo(i,0);x.lineTo(i,512);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(512,i);x.stroke()}
+ if(st.props=='castle'){let s=9961;const r=()=>((s=s*16807%2147483647)/2147483647),R=(a,b)=>a+r()*(b-a);const W=f=>{for(const dx of[-512,0,512])for(const dy of[-512,0,512]){x.save();x.translate(dx,dy);f();x.restore()}};const hex=c=>'#'+c.getHexString();
+  // pass15: flagstone courtyard — rows summing to 512 (vertical tiling) of irregular slabs wrapped horizontally, mortar joints, bevel light/shadow
+  const rows=[];let y0=0;while(y0<512){let h=Math.round(R(44,70));if(512-y0-h<40)h=512-y0;rows.push([y0,h]);y0+=h}
+  rows.forEach(([y,h],ri)=>{const x0=R(0,90),end=x0+512;let xs=x0;while(xs<end-1){let w=Math.round(R(50,115));if(end-xs-w<40)w=end-xs;
+    const sx=xs,sw=w,col=base.clone().lerp(new T.Color(ri%2?0x46425a:0x3a3648),R(.15,.5)).multiplyScalar(R(.72,1.2)),ins=R(1.6,2.8);
+    W(()=>{x.globalAlpha=.9;x.fillStyle='#121018';x.fillRect(sx,y,sw,h);x.globalAlpha=.86;x.fillStyle=hex(col);x.fillRect(sx+ins,y+ins,sw-2*ins,h-2*ins);
+     x.globalAlpha=.2;x.fillStyle='#9a96b4';x.fillRect(sx+ins,y+ins,sw-2*ins,2);x.fillRect(sx+ins,y+ins,2,h-2*ins);x.globalAlpha=.3;x.fillStyle='#07060a';x.fillRect(sx+ins,y+h-ins-2.5,sw-2*ins,2.5);x.fillRect(sx+sw-ins-2.5,y+ins,2.5,h-2*ins)});
+    xs+=w}});
+  // per-slab mottling (re-uses tiling wrap)
+  for(let i=0;i<500;i++){const cx=R(0,512),cy=R(0,512),rr=R(3,12),col=base.clone().multiplyScalar(R(.7,1.35));W(()=>{x.globalAlpha=.12;x.fillStyle=hex(col);x.beginPath();x.arc(cx,cy,rr,0,7);x.fill()})}
+  // soot / scorch stains + a few old blood stains
+  for(let i=0;i<14;i++){const cx=R(0,512),cy=R(0,512),rr=R(25,75);W(()=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,rr);g.addColorStop(0,'rgba(8,6,12,.4)');g.addColorStop(.6,'rgba(14,10,18,.14)');g.addColorStop(1,'rgba(14,10,18,0)');x.globalAlpha=1;x.fillStyle=g;x.beginPath();x.arc(cx,cy,rr,0,7);x.fill()})}
+  for(let i=0;i<6;i++){const cx=R(0,512),cy=R(0,512),rr=R(10,26);W(()=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,rr);g.addColorStop(0,'rgba(80,8,14,.35)');g.addColorStop(.7,'rgba(60,6,10,.12)');g.addColorStop(1,'rgba(60,6,10,0)');x.globalAlpha=1;x.fillStyle=g;x.beginPath();x.ellipse(cx,cy,rr,rr*R(.5,.9),R(0,3),0,7);x.fill();
+    x.globalAlpha=.3;x.fillStyle='#4a060c';for(let k=0;k<5;k++){x.beginPath();x.arc(cx+Math.cos(k*1.3)*rr*1.1,cy+Math.sin(k*1.7)*rr*.9,1.5+k%3,0,7);x.fill()}})}
+  // cracks (dark jagged + faint lit edge)
+  for(let i=0;i<26;i++){let px=R(0,512),py=R(0,512),an=R(0,6.28);const seg=[[px,py]];const L=4+(i%5);for(let k=0;k<L;k++){an+=R(-.8,.8);const sl=R(6,16);px+=Math.cos(an)*sl;py+=Math.sin(an)*sl;seg.push([px,py])}const lw=R(1.1,2.2);
+   W(()=>{x.lineCap='round';x.lineJoin='round';const path=()=>{x.beginPath();seg.forEach((q,k)=>k?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]))};x.globalAlpha=.22;x.strokeStyle='#8a86a8';x.lineWidth=lw+1.2;x.save();x.translate(1,1);path();x.stroke();x.restore();x.globalAlpha=.75;x.strokeStyle='#08070c';x.lineWidth=lw;path();x.stroke()})}
+  // moss creeping in joints + damp patches
+  for(let i=0;i<60;i++){const cx=R(0,512),cy=R(0,512),rx=R(4,14),ry=R(2,6),an=R(0,3);W(()=>{x.globalAlpha=R(.18,.32);x.fillStyle=i%3?'#2c3a26':'#3a4a2c';x.beginPath();x.ellipse(cx,cy,rx,ry,an,0,7);x.fill()})}
+  for(let i=0;i<10;i++){const cx=R(0,512),cy=R(0,512),rr=R(20,50);W(()=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,rr);g.addColorStop(0,'rgba(30,40,30,.18)');g.addColorStop(1,'rgba(30,40,30,0)');x.globalAlpha=1;x.fillStyle=g;x.beginPath();x.arc(cx,cy,rr,0,7);x.fill()})}
+  // grit + ember specks
+  for(let i=0;i<300;i++){const k=i%9;x.globalAlpha=k==0?.45:R(.12,.3);x.fillStyle=k==0?'#ff7a30':hex(base.clone().multiplyScalar(R(.6,1.5)));x.beginPath();x.arc(R(0,512),R(0,512),k==0?R(.5,1.3):R(.6,2.2),0,7);x.fill()}}
+ x.globalAlpha=st.props=='cave'?.035:st.props=='desert'?.06:st.props=='swamp'?.03:st.props=='volcano'?.04:st.props=='grave'?.035:st.props=='castle'?0:.10;x.strokeStyle='#'+new T.Color(st.ring).getHexString();x.lineWidth=2;for(let i=0;i<=512;i+=64){x.beginPath();x.moveTo(i,0);x.lineTo(i,512);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(512,i);x.stroke()}
  x.globalAlpha=1;const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(7,7);t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;return t}
 // pass8: forest in-arena obstacles = merged vertex-colored compound geometries (1 InstancedMesh per variant), own PRNG so global seed/positions unchanged
 function mkForestOB(){let s=9137;const r=()=>((s=s*16807%2147483647)/2147483647),R=(a,b)=>a+r()*(b-a);
@@ -81250,12 +81272,197 @@ function buildGrave(st){const K=graveKit(9347),{r,R,P,MG,lerpC,STONE,MOSS,DIRT,W
  // single cheap cyan soul light (no shadow)
  {const L=new T.PointLight(0x60ffd0,7,15,1.5);L.position.set(-ARENA*.35,2.2,-ARENA*.4);arena.add(L)}
 }
+// pass15: Lâu Đài Bóng Tối castle — merged vertex-color geometry + per-vertex 'glow' attr (1 shared material/program), own PRNG (global seed untouched)
+let _castleMat=null;
+function castleMat(){if(_castleMat)return _castleMat;const m=M(0xffffff,{vertexColors:true,roughness:.86});
+ m.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float glow;\nvarying float vGlow;').replace('#include <color_vertex>','#include <color_vertex>\nvGlow=glow;');
+  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vGlow;').replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=vColor.rgb*vGlow;')};
+ m.customProgramCacheKey=()=>'castleGlow1';return _castleMat=m}
+function castleKit(s){const r=()=>((s=s*16807%2147483647)/2147483647),R=(a,b)=>a+r()*(b-a);
+ const P=(g,col,pos=[0,0,0],rot=[0,0,0],scl=[1,1,1],jit=0,gl=0)=>{g=g.index?g.toNonIndexed():g;['uv','normal'].forEach(a=>g.attributes[a]&&g.deleteAttribute(a));const p=g.attributes.position;
+  if(jit)for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),h=Math.sin(x*12.9898+y*78.233+z*37.719)*43758.5453,f=1+((h-Math.floor(h))-.5)*jit;p.setXYZ(i,x*f,y*f,z*f)}
+  g.scale(...scl);g.rotateX(rot[0]);g.rotateZ(rot[2]);g.rotateY(rot[1]);g.translate(...pos);const c=new T.Color(col),ca=new Float32Array(p.count*3),ga=new Float32Array(p.count).fill(gl);
+  for(let i=0;i<p.count;i++){ca[i*3]=c.r;ca[i*3+1]=c.g;ca[i*3+2]=c.b}g.setAttribute('color',new T.BufferAttribute(ca,3));g.setAttribute('glow',new T.BufferAttribute(ga,1));return g};
+ const MG=parts=>{let n=0;parts.forEach(g=>n+=g.attributes.position.count);const pos=new Float32Array(n*3),col=new Float32Array(n*3),gw=new Float32Array(n);let o=0;
+  parts.forEach(g=>{pos.set(g.attributes.position.array,o*3);col.set(g.attributes.color.array,o*3);gw.set(g.attributes.glow.array,o);o+=g.attributes.position.count;g.dispose()});
+  const m=new T.BufferGeometry();m.setAttribute('position',new T.BufferAttribute(pos,3));m.setAttribute('color',new T.BufferAttribute(col,3));m.setAttribute('glow',new T.BufferAttribute(gw,1));m.computeVertexNormals();return m};
+ const lerpC=(a,b,t)=>new T.Color(a).lerp(new T.Color(b),t).getHex();
+ // place local-built parts (local +z = facing direction) into world
+ const X=(a,yaw,x,y,z)=>{a.forEach(g=>{g.rotateY(yaw);g.translate(x,y,z)});return a};
+ const L2W=(lx,lz,yaw)=>[lx*Math.cos(yaw)+lz*Math.sin(yaw),-lx*Math.sin(yaw)+lz*Math.cos(yaw)];
+ const ST=[0x4a4658,0x3c3848,0x5a5668,0x2e2c38],DK=[0x201e28,0x17151e,0x2a2834],MOSS=[0x34442c,0x2a3824],RED=[0x8e1420,0x6a0c16,0xb02430],GOLD=[0xd0a040,0xa07a30],IRON=[0x2c2c34,0x1c1c22,0x3c3c46],FIRE=[0xff7a20,0xffb040,0xff4a1a];
+ // rubble: small blocks + chunks
+ const rubble=(cx,cz,k,n=5)=>{const a=[];for(let i=0;i<n;i++){const an=R(0,6.283),q=R(0,.5)*k,s=R(.13,.3)*k;a.push(i%2?P(new T.BoxGeometry(s*1.6,s,s*1.1),ST[i%4],[cx+Math.cos(an)*q,s*.42,cz+Math.sin(an)*q],[R(-.35,.35),R(0,3),R(-.35,.35)],[1,1,1],.08):P(new T.DodecahedronGeometry(s,0),ST[(i+1)%4],[cx+Math.cos(an)*q,s*.38,cz+Math.sin(an)*q],[R(0,2),R(0,3),0],[1,.7,1],.25))}return a};
+ // gothic pillar (fluted shaft, base + capital)
+ const gpillar=(cx,cz,k,h)=>{const sh=h-1.0*k,a=[P(new T.BoxGeometry(1.15*k,.4*k,1.15*k),ST[1],[cx,.2*k,cz],[0,0,0],[1,1,1],.03),P(new T.BoxGeometry(.92*k,.22*k,.92*k),ST[2],[cx,.51*k,cz]),
+  P(new T.CylinderGeometry(.36*k,.42*k,sh,8),ST[0],[cx,.6*k+sh/2,cz],[0,0,0],[1,1,1],.02),P(new T.CylinderGeometry(.5*k,.36*k,.3*k,8),ST[2],[cx,h-.42*k,cz]),P(new T.BoxGeometry(1.15*k,.28*k,1.15*k),ST[1],[cx,h-.14*k,cz])];
+  for(let i=0;i<4;i++){const an=i/4*6.283+.39;a.push(P(new T.BoxGeometry(.07*k,sh*.92,.07*k),DK[0],[cx+Math.cos(an)*.39*k,.6*k+sh/2,cz+Math.sin(an)*.39*k]))}
+  if(r()>.5)a.push(P(new T.SphereGeometry(.22*k,5,3),MOSS[0],[cx+.3*k,.55*k,cz+.3*k],[0,0,0],[1.6,.4,1.2],.2));
+  return a};
+ // broken pillar: jagged top + fallen drum + rubble
+ const bpillar=(cx,cz,k,hb)=>{const a=[P(new T.BoxGeometry(1.15*k,.4*k,1.15*k),ST[1],[cx,.2*k,cz],[0,0,0],[1,1,1],.04),
+  P(new T.CylinderGeometry(.38*k,.42*k,hb,8),ST[0],[cx,.4*k+hb/2,cz],[0,0,0],[1,1,1],.04),
+  P(new T.CylinderGeometry(.16*k,.38*k,.45*k,8),ST[2],[cx+.06*k,.4*k+hb+.16*k,cz],[R(-.3,.3),0,R(-.3,.3)],[1,1,1],.3),
+  P(new T.CylinderGeometry(.38*k,.38*k,.75*k,8),ST[3],[cx+.95*k,.38*k,cz+.25*k],[0,R(0,3),Math.PI/2],[1,1,1],.05)];
+  for(let i=0;i<4;i++){const an=i/4*6.283+.39;a.push(P(new T.BoxGeometry(.07*k,hb*.9,.07*k),DK[0],[cx+Math.cos(an)*.41*k,.4*k+hb*.47,cz+Math.sin(an)*.41*k]))}
+  a.push(P(new T.SphereGeometry(.2*k,5,3),MOSS[1],[cx-.3*k,.45*k,cz+.32*k],[0,0,0],[1.6,.4,1.2],.2));
+  a.push(...rubble(cx-.65*k,cz+.55*k,.7*k));return a};
+ // headless knight statue on plinth (sword planted), fallen head at base
+ const statue=(cx,cz,k,y0=0)=>[P(new T.BoxGeometry(1.3*k,.5*k,1.3*k),ST[1],[cx,y0+.25*k,cz],[0,0,0],[1,1,1],.03),P(new T.BoxGeometry(1.08*k,.7*k,1.08*k),ST[0],[cx,y0+.85*k,cz]),P(new T.BoxGeometry(1.25*k,.15*k,1.25*k),ST[2],[cx,y0+1.27*k,cz]),
+  P(new T.CylinderGeometry(.3*k,.48*k,1.2*k,7),ST[2],[cx,y0+1.95*k,cz],[0,0,0],[1,1,1],.05),P(new T.CylinderGeometry(.4*k,.3*k,.8*k,7),ST[0],[cx,y0+2.95*k,cz],[0,0,0],[1.1,1,.8],.05),
+  P(new T.SphereGeometry(.18*k,6,4),ST[2],[cx-.42*k,y0+3.25*k,cz]),P(new T.SphereGeometry(.18*k,6,4),ST[2],[cx+.42*k,y0+3.25*k,cz]),
+  P(new T.CylinderGeometry(.1*k,.13*k,.2*k,6),ST[3],[cx,y0+3.45*k,cz],[.2,0,.15],[1,1,1],.25),
+  P(new T.BoxGeometry(.11*k,1.55*k,.05*k),ST[2],[cx,y0+2.1*k,cz+.48*k]),P(new T.BoxGeometry(.55*k,.09*k,.11*k),ST[1],[cx,y0+2.88*k,cz+.48*k]),P(new T.SphereGeometry(.07*k,5,4),ST[1],[cx,y0+3.0*k,cz+.48*k]),
+  P(new T.CylinderGeometry(.11*k,.12*k,.5*k,5),ST[0],[cx-.5*k,y0+2.95*k,cz+.12*k],[.3,0,.3]),
+  P(new T.SphereGeometry(.21*k,6,5),ST[2],[cx+.78*k,y0+.2*k,cz+.45*k],[0,0,0],[1,1.1,1],.12),
+  P(new T.SphereGeometry(.09*k,4,3),MOSS[0],[cx-.32*k,y0+1.37*k,cz+.42*k],[0,0,0],[1.5,.4,1],.2)];
+ // iron brazier with glowing coals (flame added separately)
+ const brazier=(cx,cz,k,y0=0)=>{const a=[P(new T.CylinderGeometry(.34*k,.44*k,.2*k,8),IRON[1],[cx,y0+.1*k,cz]),P(new T.CylinderGeometry(.08*k,.1*k,1.0*k,6),IRON[0],[cx,y0+.65*k,cz]),
+  P(new T.CylinderGeometry(.5*k,.24*k,.36*k,8),IRON[2],[cx,y0+1.3*k,cz]),P(new T.TorusGeometry(.5*k,.05*k,4,10),GOLD[1],[cx,y0+1.48*k,cz],[Math.PI/2,0,0]),
+  P(new T.CylinderGeometry(.43*k,.43*k,.06*k,8),0xff5010,[cx,y0+1.44*k,cz],[0,0,0],[1,1,1],0,1.3)];
+  for(let i=0;i<3;i++){const an=i/3*6.283;a.push(P(new T.BoxGeometry(.06*k,.55*k,.06*k),IRON[0],[cx+Math.cos(an)*.3*k,y0+.32*k,cz+Math.sin(an)*.3*k],[Math.sin(an)*.4,0,-Math.cos(an)*.4]))}
+  return a};
+ const flameG=(cx,cy,cz,k,gl=1.5,add=0)=>{const a=[P(new T.ConeGeometry(.3*k,.95*k,7),add?0x9a2804:FIRE[2],[cx,cy+.47*k,cz],[0,0,0],[1,1,1],.18,gl),P(new T.ConeGeometry(.2*k,.72*k,6),add?0xc85010:FIRE[1],[cx+.03*k,cy+.36*k,cz],[0,.5,0],[1,1,1],.12,gl),P(new T.ConeGeometry(.1*k,.42*k,5),add?0xa08850:0xfff0a0,[cx,cy+.22*k,cz],[0,0,0],[1,1,1],0,gl)];
+  if(add)for(let i=0;i<3;i++){const an=i/3*6.283+.5;a.push(P(new T.ConeGeometry(.1*k,.5*k,5),0x8a3006,[cx+Math.cos(an)*.17*k,cy+.28*k,cz+Math.sin(an)*.17*k],[Math.sin(an)*.35,0,-Math.cos(an)*.35],[1,1,1],.15,gl))}
+  return a};
+ // hanging red banner (local: top at y=0, faces +z)
+ const banner=(k=1)=>{const w=1.1*k,h=2.4*k,cl=new T.BoxGeometry(w,h,.05*k,1,8,1);{const p=cl.attributes.position;for(let i=0;i<p.count;i++)p.setZ(i,p.getZ(i)+Math.sin(p.getY(i)*2.2/k+.5)*.06*k)}
+  return [P(new T.CylinderGeometry(.05*k,.05*k,w+.4*k,5),IRON[0],[0,0,0],[0,0,Math.PI/2]),P(new T.SphereGeometry(.08*k,5,4),GOLD[0],[-(w/2+.22*k),0,0]),P(new T.SphereGeometry(.08*k,5,4),GOLD[0],[w/2+.22*k,0,0]),
+   P(cl,RED[0],[0,-h/2-.05*k,0]),P(new T.ConeGeometry(w/2,.55*k,4),RED[1],[0,-h-.33*k,0],[Math.PI,0,0],[1,1,.08]),
+   P(new T.BoxGeometry(.07*k,h,.08*k),GOLD[1],[-w/2,-h/2-.05*k,.02*k]),P(new T.BoxGeometry(.07*k,h,.08*k),GOLD[1],[w/2,-h/2-.05*k,.02*k]),P(new T.BoxGeometry(w,.1*k,.08*k),GOLD[1],[0,-.28*k,.03*k]),
+   P(new T.OctahedronGeometry(.27*k,0),GOLD[0],[0,-h*.48,.07*k],[0,0,0],[1,1.35,.15],0,.25),P(new T.OctahedronGeometry(.12*k,0),RED[2],[0,-h*.48,.1*k],[0,0,0],[1,1.35,.15],0,.4),P(new T.BoxGeometry(.6*k,.06*k,.06*k),GOLD[0],[0,-h*.72,.05*k])]};
+ // hanging chain (local: top at y=0) + shackle ring
+ const chain=(n,k=1)=>{const a=[];for(let j=0;j<n;j++)a.push(P(new T.TorusGeometry(.085*k,.025*k,3,6),IRON[j%3],[0,-j*.15*k,0],[0,j%2?Math.PI/2:0,0]));a.push(P(new T.TorusGeometry(.2*k,.04*k,3,8),IRON[2],[0,-n*.15*k-.15*k,0],[0,Math.PI/2,0]));return a};
+ return {r,R,P,MG,X,L2W,lerpC,ST,DK,MOSS,RED,GOLD,IRON,FIRE,rubble,gpillar,bpillar,statue,brazier,flameG,banner,chain}}
+function castleFlameMat(){const fm=new T.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:1,depthWrite:false,blending:T.AdditiveBlending});
+ fm.onBeforeCompile=sh=>{sh.uniforms.uW={value:0};sh.vertexShader='uniform float uW;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfloat _fs=instanceMatrix[3][0]*1.7+instanceMatrix[3][2]*1.3;transformed.y*=1.+sin(uW*13.+_fs)*.16+sin(uW*7.3+_fs*2.)*.08;transformed.x+=sin(uW*9.+_fs)*transformed.y*.09;transformed.z+=cos(uW*8.+_fs)*transformed.y*.07;');fm.userData._ws=sh};
+ fm.customProgramCacheKey=()=>'caFlame1';swayMats.push(fm);return fm}
+// flames for brazier obstacles (variant D): placed from the obstacle instance matrices after the OB loop (no rand)
+function castleOBFlames(){const K=castleKit(4243),fg=MG2(K),list=obs.filter(o=>o.im.geometry.userData.castleBrazier);if(!list.length)return;
+ const im=new T.InstancedMesh(fg,castleFlameMat(),list.length),lm=new T.Matrix4().makeTranslation(0,.75+1.44*1.15,0).multiply(new T.Matrix4().makeScale(1.25,1.25,1.25)),m=new T.Matrix4(),v=new T.Vector3(),hp=new Float32Array(list.length*3);
+ list.forEach((o,i)=>{m.multiplyMatrices(o.m,lm);im.setMatrixAt(i,m);v.set(0,.5,0).applyMatrix4(m);hp.set([v.x,v.y,v.z],i*3)});arena.add(im);
+ arena.add(new T.Points(new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(hp,3)),new T.PointsMaterial({map:dot,color:0xff7a30,size:4,transparent:true,opacity:.4,depthWrite:false,blending:T.AdditiveBlending})))}
+const MG2=K=>K.MG(K.flameG(0,0,0,1,0,1));
+function mkCastleOB(){const K=castleKit(6997),{R,P,MG,ST,DK,MOSS,IRON,GOLD,rubble,bpillar,statue,brazier,flameG}=K;
+ const floor=(rr,col=0x24222c)=>P(new T.CircleGeometry(rr,11),col,[0,.02,0],[-Math.PI/2,0,0],[1,1,1],.14);
+ // A: broken gothic pillar (r 1.1)
+ const A=MG([floor(1.35),...bpillar(0,0,1.25,3.6),...rubble(.7,-.6,.8,4)]);
+ // B: headless knight statue on plinth (r 1.1)
+ const B=MG([floor(1.35,0x221f2a),...statue(0,0,.95),...rubble(-.8,.6,.6,4),P(new T.DodecahedronGeometry(.25,0),ST[3],[.85,.15,-.6],[0,1,0],[1,.6,1],.25)]);
+ // C: collapsed masonry pile: big blocks + fallen drums + capital (r 1.2)
+ const C=MG([floor(1.45),P(new T.BoxGeometry(1.5,.65,.95),ST[1],[-.15,.32,0],[0,.35,.06],[1,1,1],.04),P(new T.BoxGeometry(1.0,.55,.8),ST[0],[.25,.85,-.05],[.1,-.3,-.12],[1,1,1],.05),
+  P(new T.CylinderGeometry(.4,.4,.8,8),ST[2],[.55,.4,.7],[0,1.1,Math.PI/2],[1,1,1],.04),P(new T.CylinderGeometry(.36,.4,.7,8),ST[3],[-.75,.38,-.7],[0,-.5,Math.PI/2],[1,1,1],.04),
+  P(new T.BoxGeometry(1.0,.25,1.0),ST[2],[-.2,1.25,0],[.25,.4,.15],[1,1,1],.04),P(new T.CylinderGeometry(.45,.32,.28,8),ST[0],[-.15,1.5,.05],[.2,0,.2]),
+  ...rubble(.8,-.6,.9,5),...rubble(-.9,.5,.7,4),P(new T.SphereGeometry(.18,5,3),MOSS[0],[.1,.62,.45],[0,0,0],[1.6,.4,1.2],.2)]);
+ // D: brazier on a stone plinth with fire + scattered bricks (r 1.2)
+ const D=MG([floor(1.45,0x221e26),P(new T.BoxGeometry(1.7,.45,1.7),ST[1],[0,.22,0],[0,0,0],[1,1,1],.03),P(new T.BoxGeometry(1.45,.3,1.45),ST[2],[0,.6,0]),
+  ...[0,1,2,3].map(i=>{const an=i/4*6.283+.785;return P(new T.BoxGeometry(.2,.75,.2),ST[0],[Math.cos(an)*.95,.38,Math.sin(an)*.95])}),
+  ...brazier(0,0,1.15,.75),P(new T.SphereGeometry(.4,7,4),0xff5a14,[0,.75+1.44*1.15,0],[0,0,0],[1,.35,1],.15,1.3),...rubble(.95,.75,.6,4),P(new T.BoxGeometry(.5,.2,.3),ST[3],[-1.0,.1,-.5],[0,.6,.2])]);
+ D.userData.castleBrazier=1;const mat=castleMat();return [[[A,B],0xffffff,1.1,[0,0,0],mat],[[C,D],0xffffff,1.2,[0,0,0],mat]]}
+function buildCastle(st){const K=castleKit(9973),{r,R,P,MG,X,L2W,lerpC,ST,DK,MOSS,RED,GOLD,IRON,FIRE,rubble,gpillar,bpillar,statue,brazier,flameG,banner,chain}=K,mat=castleMat(),d=new T.Object3D();
+ const south=a=>{let x=Math.abs(((a-Math.PI/2)%6.283+6.283)%6.283);return Math.min(x,6.283-x)};// camera sits at +z
+ const GY=-1,RW=ARENA+4.5,NW=30,flames=[],outer=[];
+ // --- courtyard wall ring: tall battlements N/sides, medium flanks, low ruined wall in camera (south) sector; gatehouse at north
+ const wallSeg=(len,h,th,ruin)=>{const a=[P(new T.BoxGeometry(len,h,th),ST[1],[0,h/2,0],[0,0,0],[1,1,1],.01),P(new T.BoxGeometry(len+.1,.6,th+.5),ST[3],[0,.3,0])];
+  for(let y=1.0;y<h-.4;y+=R(.8,1.0))a.push(P(new T.BoxGeometry(len*.995,.07,.06),DK[1],[0,y,th/2+.02]));
+  for(let j=0;j<4;j++)a.push(P(new T.BoxGeometry(R(.6,1.2),R(.4,.7),.12),ST[j%2?0:2],[R(-len/2+.7,len/2-.7),R(.7,Math.max(.8,h-.8)),th/2+.05],[0,0,0],[1,1,1],.05));
+  a.push(P(new T.BoxGeometry(len,.3,th+.4),ST[2],[0,h+.15,0]));
+  const nm=Math.floor(len/1.5);for(let j=0;j<nm;j++){if(ruin&&r()<.3)continue;const mx=-len/2+(j+.5)*len/nm;a.push(P(new T.BoxGeometry(.85,R(.85,1.05),th*.9),ST[j%2?0:3],[mx,h+.75,0],[0,0,0],[1,1,1],.04))}
+  a.push(P(new T.SphereGeometry(.6,5,3),MOSS[0],[R(-len/2,len/2),.25,th/2+.25],[0,0,0],[1.8,.4,.6],.2));return a};
+ const lowWall=(len)=>{const a=[];const n=5;for(let j=0;j<n;j++){const h=R(.5,1.5),w=len/n*R(.85,1.05);a.push(P(new T.BoxGeometry(w,h,1.2),ST[j%4],[-len/2+(j+.5)*len/n,h/2,0],[0,0,R(-.04,.04)],[1,1,1],.05))}
+  a.push(...rubble(R(-len/3,len/3),.9,1.6,5));return a};
+ const gotWin=(h)=>[P(new T.BoxGeometry(.9,2.0,.12),DK[1],[0,h,0]),P(new T.ConeGeometry(.64,.8,4),DK[1],[0,h+1.35,0],[0,Math.PI/4,0],[1,1,.12]),
+  P(new T.BoxGeometry(.66,1.8,.05),0xc03018,[0,h,.05],[0,0,0],[1,1,1],0,.55),P(new T.ConeGeometry(.45,.6,4),0xc03018,[0,h+1.2,.05],[0,Math.PI/4,0],[1,1,.1],0,.55),P(new T.BoxGeometry(.05,1.8,.08),IRON[1],[0,h,.08]),P(new T.BoxGeometry(.66,.05,.08),IRON[1],[0,h+.2,.08])];
+ for(let i=0;i<NW;i++){const a=(i+.5)/NW*6.283,sd=south(a),cx=Math.cos(a)*RW,cz=Math.sin(a)*RW,yaw=Math.atan2(-cx,-cz),len=6.283*RW/NW*1.05;
+  if(i==22){// gatehouse (north): piers, pointed arch, portcullis, hellish glow behind, pier turrets
+   const g=[];for(const sx of[-1,1]){g.push(P(new T.BoxGeometry(2.0,10,2.6),ST[1],[sx*2.7,5,0],[0,0,0],[1,1,1],.01),P(new T.BoxGeometry(2.4,.6,3.0),ST[3],[sx*2.7,.3,0]));
+     for(let y=1.2;y<9.5;y+=.95)g.push(P(new T.BoxGeometry(2.04,.07,2.64),DK[1],[sx*2.7,y,0]));
+     g.push(P(new T.CylinderGeometry(1.25,1.25,.4,8),ST[2],[sx*2.7,10.2,0]),P(new T.ConeGeometry(1.4,3.2,8),DK[0],[sx*2.7,12.0,0]),P(new T.ConeGeometry(.08,.6,4),GOLD[0],[sx*2.7,13.8,0]),
+      P(new T.BoxGeometry(1.2,1.6,1.2),ST[0],[sx*1.15,6.6,0],[0,0,sx*.62],[1,1,1],.02))}
+   g.push(P(new T.BoxGeometry(3.6,2.6,2.4),ST[1],[0,8.6,0]),P(new T.BoxGeometry(7.6,.4,3.0),ST[2],[0,9.9,0]),P(new T.BoxGeometry(.6,.9,.3),GOLD[1],[0,8.3,1.25],[0,0,Math.PI/4],[1,1,1],0,.2));
+   for(let j=0;j<5;j++)g.push(P(new T.BoxGeometry(.8,.9,2.4),ST[j%2?0:3],[-3.2+j*1.6,10.55,0]));
+   for(let j=0;j<9;j++)g.push(P(new T.CylinderGeometry(.05,.05,6.2,4),IRON[j%2],[-1.6+j*.4,3.1,.35]),P(new T.ConeGeometry(.07,.25,4),IRON[2],[-1.6+j*.4,.0,.35],[Math.PI,0,0]));
+   for(let j=0;j<5;j++)g.push(P(new T.BoxGeometry(3.5,.07,.07),IRON[0],[0,.9+j*1.2,.35]));
+   g.push(P(new T.BoxGeometry(3.5,6.8,.05),0xff4a14,[0,3.4,-.7],[0,0,0],[1,1,1],0,.9),P(new T.BoxGeometry(3.3,2,.6),0x401008,[0,.2,-.4],[0,0,0],[1,1,1],0,.5));
+   for(const sx of[-1,1]){const lx=sx*1.95;g.push(P(new T.BoxGeometry(.12,.5,.35),IRON[0],[lx,4.6,1.4]),P(new T.CylinderGeometry(.13,.08,.35,6),IRON[2],[lx,4.95,1.5]));const w=L2W(lx,1.5,yaw);flames.push([cx+w[0],GY+5.1,cz+w[1],.75]);
+    const bn=banner(1.15);bn.forEach(q=>q.translate(sx*2.7,8.4,1.32));g.push(...bn)}
+   outer.push(...X(g,yaw,cx,GY,cz));continue}
+  if(sd>1.25){const h=R(6.6,7.6),g=wallSeg(len,h,1.4,r()<.35);
+   if(i%2==0){const bn=banner(1.25);bn.forEach(q=>q.translate(R(-1.5,1.5),h-.2,.78));g.push(...bn)}
+   else{g.push(...gotWin(h*.48).map(q=>q.translate(0,0,.72)));}
+   if(i%3==1){const ch=chain(14);ch.forEach(q=>q.translate(len*.33,h-.3,.8));g.push(...ch);const ch2=chain(10);ch2.forEach(q=>q.translate(-len*.33,h-.3,.8));g.push(...ch2)}
+   outer.push(...X(g,yaw,cx,GY,cz))}
+  else if(sd>.85){const h=R(3.0,3.8),g=wallSeg(len,h,1.3,true);outer.push(...X(g,yaw,cx,GY,cz))}
+  else outer.push(...X(lowWall(len),yaw,cx,GY,cz))}
+ // --- towers (only away from camera sector)
+ for(const off of[-.5,.5,-1.15,1.15,-1.8,1.8]){const a=-Math.PI/2+off,rr=RW+1.6,cx=Math.cos(a)*rr,cz=Math.sin(a)*rr,yaw=Math.atan2(-cx,-cz),H=R(11,14)*(Math.abs(off)>1.5?.85:1),g=[];
+  g.push(P(new T.CylinderGeometry(2.3,2.6,H,10),ST[1],[0,H/2,0],[0,0,0],[1,1,1],.015),P(new T.CylinderGeometry(2.8,2.8,.5,10),ST[2],[0,H+.25,0]));
+  for(let y=1.5;y<H-.5;y+=1.1)g.push(P(new T.CylinderGeometry(2.33,2.33,.07,10),DK[1],[0,y,0]));
+  for(let j=0;j<10;j++){const an=j/10*6.283;g.push(P(new T.BoxGeometry(.85,.9,.6),ST[j%2?0:3],[Math.cos(an)*2.5,H+.95,Math.sin(an)*2.5],[0,-an,0]))}
+  g.push(P(new T.ConeGeometry(2.6,4.2,10),DK[0],[0,H+3.4,0]),P(new T.CylinderGeometry(.04,.04,1.6,4),IRON[0],[0,H+6.2,0]),P(new T.BoxGeometry(.8,.45,.03),RED[0],[.4,H+6.6,0]));
+  for(const [wy,wx] of[[H*.35,0],[H*.62,-.7],[H*.62,.7],[H*.82,0]])g.push(P(new T.BoxGeometry(.32,.9,.1),0xff8a30,[wx,wy,2.43],[0,0,0],[1,1,1],0,1.1),P(new T.ConeGeometry(.23,.3,4),0xff8a30,[wx,wy+.55,2.43],[0,Math.PI/4,0],[1,1,.2],0,1.1));
+  outer.push(...X(g,yaw,cx,GY,cz))}
+ // --- gothic pillar ring on the arena rim: tall w/ banners or fire bowls (far side), broken stumps in camera sector
+ {const RP=ARENA+2.2;for(let j=0;j<16;j++){const a=(j+.5)/16*6.283,sd=south(a),cx=Math.cos(a)*RP,cz=Math.sin(a)*RP,yaw=Math.atan2(-cx,-cz);
+   if(sd<.9){outer.push(...X(bpillar(0,0,1.1,R(.6,1.6)),yaw,cx,GY,cz));continue}
+   const h=sd<1.25?4.8:7.2,g=gpillar(0,0,1.15,h);
+   if(j%2){g.push(...brazier(0,0,.9,h));flames.push([cx,GY+h+1.44*.9,cz,1.05])}
+   else{const bn=banner(.95);bn.forEach(q=>q.translate(0,h-.9,.62));g.push(...bn)}
+   outer.push(...X(g,yaw,cx,GY,cz))}}
+ // --- headless statues between pillars (far side)
+ for(const j of[10,14,8,0]){const a=j/16*6.283,rr=ARENA+2.6,cx=Math.cos(a)*rr,cz=Math.sin(a)*rr;outer.push(...X(statue(0,0,1.25),Math.atan2(-cx,-cz),cx,GY,cz))}
+ // --- steps from courtyard down to the gate + carpet runner leading to the arena centre
+ {const g=[];for(let j=0;j<3;j++){const yt=-.25*(j+1),z=-(ARENA+1.4+j*.95);g.push(P(new T.BoxGeometry(4.6,yt+1.02,1.0),ST[j%2?1:3],[0,(yt-1)/2,z],[0,0,0],[1,1,1],.02),P(new T.BoxGeometry(2.5,.04,1.0),RED[1],[0,yt+.02,z]))}
+  outer.push(...g)}
+ // --- distant dark keep silhouette (north) + rocky hills behind walls
+ {const g=[],kx=8,kz=-56,dk=lerpC(DK[1],0x2a2440,.3);
+  g.push(P(new T.BoxGeometry(16,18,9),dk,[kx,8,kz]),P(new T.BoxGeometry(26,9,7),dk,[kx,3.5,kz+2]),P(new T.SphereGeometry(16,9,5),0x15131c,[kx,-4,kz-2],[0,0,0],[1.6,.45,.8],.1));
+  for(const [tx,tz,th,tr] of[[-8,0,24,2.6],[8,0,24,2.6],[-13,2,15,2],[13,2,15,2],[0,-2,32,3.2]]){g.push(P(new T.CylinderGeometry(tr,tr*1.1,th,8),dk,[kx+tx,th/2-1,kz+tz]),P(new T.ConeGeometry(tr*1.3,tr*3.2,8),0x110f18,[kx+tx,th-1+tr*1.6,kz+tz]));
+   for(let w=0;w<3;w++)g.push(P(new T.BoxGeometry(.6,1.1,.1),0xff9040,[kx+tx+R(-tr*.4,tr*.4),R(th*.35,th*.85),kz+tz+tr+.05],[0,0,0],[1,1,1],0,1.4))}
+  for(let w=0;w<10;w++)g.push(P(new T.BoxGeometry(.7,1.2,.1),0xff8030,[kx+R(-7,7),R(4,15),kz+4.55],[0,0,0],[1,1,1],0,1.2));
+  for(let i=0;i<12;i++){const a=R(0,6.283),rr=R(44,58),s=R(5,12);if(south(a)<.7)continue;g.push(P(new T.DodecahedronGeometry(s,0),lerpC(0x15131c,ST[3],R(0,.35)),[Math.cos(a)*rr,-s*.25,Math.sin(a)*rr],[R(0,1),R(0,3),0],[1.3,R(.45,.8),1],.15))}
+  outer.push(...g)}
+ const om=new T.Mesh(MG(outer),mat);arena.add(om);
+ // blood moon (unfogged) + halo
+ {const moon=new T.Mesh(new T.CircleGeometry(4.2,22),B(0xe07858,{fog:false}));moon.position.set(-20,21,-66);arena.add(moon);
+  const halo=new T.Mesh(new T.CircleGeometry(8,22),B(0xa03028,{fog:false,transparent:true,opacity:.14,depthWrite:false}));halo.position.set(-20,21,-66.2);arena.add(halo)}
+ // --- courtyard floor details (1 merged): carpet runner, centre rune circle, rim braziers, rubble/debris
+ {const g=[];const z0=-(ARENA+.6),z1=-6.5,Lc=z0-z1,zc=(z0+z1)/2;
+  g.push(P(new T.BoxGeometry(2.5,.03,-Lc),RED[1],[0,.016,zc]),P(new T.BoxGeometry(2.1,.035,-Lc),RED[0],[0,.02,zc]),P(new T.BoxGeometry(.1,.04,-Lc),GOLD[1],[-1.12,.024,zc]),P(new T.BoxGeometry(.1,.04,-Lc),GOLD[1],[1.12,.024,zc]));
+  for(let z=z1-1.6;z>z0+1;z-=2.6)g.push(P(new T.OctahedronGeometry(.42,0),GOLD[0],[0,.03,z],[Math.PI/2,0,0],[1,1.5,.06]),P(new T.OctahedronGeometry(.22,0),RED[2],[0,.035,z],[Math.PI/2,0,0],[1,1.5,.06]));
+  for(let j=0;j<5;j++)g.push(P(new T.ConeGeometry(.25,.6,3),RED[1],[R(-.9,.9),.018,z1+.2+R(0,.2)],[Math.PI/2,R(-.3,.3),0],[1,1,.05]));
+  // centre: gold inlay rings + purple glowing rune hexagon / hexagram
+  g.push(P(new T.RingGeometry(5.25,5.5,48),GOLD[1],[0,.022,0],[-Math.PI/2,0,0],[1,1,1],0,.12),P(new T.RingGeometry(5.8,6.0,48),DK[0],[0,.021,0],[-Math.PI/2,0,0]),
+   P(new T.RingGeometry(2.6,3.0,6),0x7a30b8,[0,.03,0],[-Math.PI/2,0,0],[1,1,1],0,.38),P(new T.RingGeometry(1.95,2.12,3),0x6424a0,[0,.032,0],[-Math.PI/2,0,0],[1,1,1],0,.35),P(new T.RingGeometry(1.95,2.12,3),0x6424a0,[0,.033,0],[-Math.PI/2,0,Math.PI/3],[1,1,1],0,.35));
+  for(let j=0;j<12;j++){const an=j/12*6.283;g.push(P(new T.BoxGeometry(.18,.03,.5),j%2?GOLD[0]:0x9a38e0,[Math.cos(an)*4.4,.028,Math.sin(an)*4.4],[0,-an,0],[1,1,1],0,j%2?.12:.45))}
+  // rim braziers (low, on the arena rim)
+  for(let j=0;j<10;j++){if(j==7||south((j+.5)/10*6.283)<.7)continue;const a=(j+.5)/10*6.283,rr=ARENA+.45,x=Math.cos(a)*rr,z=Math.sin(a)*rr;g.push(...brazier(x,z,.85));flames.push([x,1.44*.85,z,.95])}
+  // debris: rubble piles, fallen drums, bricks (kept low; off the carpet)
+  const ok=(x,z)=>!(Math.abs(x)<2&&z<-5);
+  for(let i=0;i<12;i++){const a=R(0,6.283),rr=R(ARENA-7,ARENA-1),x=Math.cos(a)*rr,z=Math.sin(a)*rr;if(ok(x,z))g.push(...rubble(x,z,R(.6,1.0),4))}
+  for(let i=0;i<4;i++){const a=R(0,6.283),rr=R(ARENA-6,ARENA-1.5),x=Math.cos(a)*rr,z=Math.sin(a)*rr;if(ok(x,z))g.push(P(new T.CylinderGeometry(.38,.4,.8,8),ST[i%4],[x,.38,z],[0,R(0,3),Math.PI/2],[1,1,1],.05))}
+  for(let i=0;i<26;i++){const a=R(0,6.283),rr=R(6,ARENA-1),x=Math.cos(a)*rr,z=Math.sin(a)*rr,s=R(.12,.28);if(ok(x,z))g.push(P(new T.BoxGeometry(s*1.7,s*.8,s),ST[i%4],[x,s*.35,z],[R(-.3,.3),R(0,3),R(-.3,.3)],[1,1,1],.06))}
+  for(let i=0;i<3;i++){const a=R(0,6.283),rr=R(ARENA-5,ARENA-1.5),x=Math.cos(a)*rr,z=Math.sin(a)*rr;if(ok(x,z))g.push(P(new T.SphereGeometry(.24,6,5),ST[2],[x,.2,z],[0,0,0],[1,1.1,1],.12))}
+  arena.add(new T.Mesh(MG(g),mat))}
+ // --- flickering flames: 1 InstancedMesh (additive, vertex shader flicker) + glow halos + sparks Points
+ {const fg=MG(flameG(0,0,0,1,0,1)),fm=castleFlameMat();
+  const im=new T.InstancedMesh(fg,fm,flames.length);flames.forEach(([x,y,z,s],i)=>{d.position.set(x,y,z);d.rotation.set(0,R(0,6.3),0);d.scale.setScalar(s);d.updateMatrix();im.setMatrixAt(i,d.matrix)});arena.add(im);
+  const hp=new Float32Array(flames.length*3);flames.forEach(([x,y,z,s],i)=>hp.set([x,y+.45*s,z],i*3));
+  arena.add(new T.Points(new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(hp,3)),new T.PointsMaterial({map:dot,color:0xff7a30,size:3.6,transparent:true,opacity:.4,depthWrite:false,blending:T.AdditiveBlending})));
+  const sn=90,sp=new Float32Array(sn*3);for(let i=0;i<sn;i++){const f=flames[i%flames.length];sp.set([f[0]+R(-.5,.5),f[1]+R(.5,3.2),f[2]+R(-.5,.5)],i*3)}
+  arena.add(new T.Points(new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(sp,3)),new T.PointsMaterial({map:dot,color:0xffa040,size:.16,transparent:true,opacity:.9,depthWrite:false,blending:T.AdditiveBlending})));
+  // low drifting dust / smoke near the walls
+  const dn=40,dp=new Float32Array(dn*3);for(let i=0;i<dn;i++){const a=R(0,6.283),rr=R(ARENA-6,ARENA+4);dp.set([Math.cos(a)*rr,R(.2,1.6),Math.sin(a)*rr],i*3)}
+  arena.add(new T.Points(new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(dp,3)),new T.PointsMaterial({map:dot,color:0x6a5a8a,size:4,transparent:true,opacity:.08,depthWrite:false})))}
+ // single cheap warm fire light near the gate / carpet (no shadow)
+ {const L=new T.PointLight(0xff7a30,8,18,1.5);L.position.set(0,3,-24);arena.add(L)}
+}
 function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geometry.dispose()});arena=new T.Group();S.add(arena);fires=[];sway=[];swayMats=[];seed=7+st.idx*13;
  S.background=new T.Color(st.bg);S.fog=new T.Fog(st.fog[0],st.fog[1]*1.3,st.fog[2]*1.5);hemi.color.set(st.hemi[0]);hemi.groundColor.set(st.hemi[1]);hemi.intensity=st.hemi[2];
  key.color.set(st.key[0]);key.intensity=st.key[1]*1.2;rim.color.set(st.rim[0]);rim.intensity=st.rim[1]*1.5;R.toneMappingExposure=1.15;
- const fl=new T.Mesh(new T.CylinderGeometry(ARENA+1,ARENA+2,1,14),M(st.ground));fl.position.y=-.501;fl.receiveShadow=true;arena.add(fl);
+ const p0=st.props;const fl=new T.Mesh(new T.CylinderGeometry(ARENA+1,ARENA+2,1,14),M(st.ground));fl.position.y=-.501;fl.receiveShadow=true;arena.add(fl);
  const top=new T.Mesh(new T.CircleGeometry(ARENA+1,48),new T.MeshStandardMaterial({map:groundTex(st),roughness:.95}));top.rotation.x=-Math.PI/2;top.position.y=.005;top.receiveShadow=true;arena.add(top);
- {const cols=[st.ground,st.ring].map(c=>new T.Color(c));const dg=new T.ConeGeometry(.12,.45,3),im=new T.InstancedMesh(dg,M(new T.Color(st.ground).lerp(new T.Color(0xffffff),.12)),220),d=new T.Object3D();
+ {const cols=[st.ground,st.ring].map(c=>new T.Color(c));const dg=p0=='castle'?new T.DodecahedronGeometry(.13,0).scale(1,.5,1).translate(0,-.13,0):new T.ConeGeometry(.12,.45,3),im=new T.InstancedMesh(dg,M(new T.Color(st.ground).lerp(new T.Color(0xffffff),.12)),220),d=new T.Object3D();
   for(let i=0;i<220;i++){const a=rnd(0,6.28),r=Math.sqrt(rand())*(ARENA-1);d.position.set(Math.cos(a)*r,.18,Math.sin(a)*r);d.rotation.set(rnd(-.3,.3),rnd(0,6),rnd(-.3,.3));d.scale.setScalar(rnd(.6,1.6));d.updateMatrix();im.setMatrixAt(i,d.matrix)}arena.add(im)}
  const out=new T.Mesh(new T.CircleGeometry(70,20),M(new T.Color(st.ground).multiplyScalar(.6)));out.rotation.x=-Math.PI/2;out.position.y=-1;arena.add(out);
  const ring=new T.Mesh(new T.RingGeometry(ARENA-.4,ARENA,56),B(st.ring,{transparent:true,opacity:.5}));ring.rotation.x=-Math.PI/2;ring.position.y=.02;arena.add(ring);
@@ -81302,20 +81509,16 @@ function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geome
  if(p=='swamp'){const s0=seed;buildSwamp(st);seed=s0;for(let i=0;i<1722;i++)rand()}// pass12: own PRNG, then advance global seed exactly as the old swamp block did (obstacle positions unchanged)
  if(p=='volcano'){const s0=seed;buildVolcano(st);seed=s0;for(let i=0;i<232;i++)rand()}// pass13: own PRNG, then advance global seed exactly as the old volcano block did (obstacle positions unchanged)
  if(p=='grave'){const s0=seed;buildGrave(st);seed=s0;for(let i=0;i<182;i++)rand()}// pass14: own PRNG, then advance global seed exactly as the old grave block did (obstacle positions unchanged)
- if(p=='castle'){for(let r=4;r<ARENA;r+=4.5){const g=new T.Mesh(new T.RingGeometry(r,r+.12,48),B(0xff4a1a,{transparent:true,opacity:.35}));g.rotation.x=-Math.PI/2;g.position.y=.02;arena.add(g)}
-  const rune=new T.Mesh(new T.RingGeometry(2.6,3,6),B(0xb040ff,{transparent:true,opacity:.5}));rune.rotation.x=-Math.PI/2;rune.position.y=.03;arena.add(rune);
-  const cm=B(0xff5a1a);for(let i=0;i<30;i++){const c=mesh(new T.BoxGeometry(rnd(.08,.18),.03,rnd(1,3)),cm,[rnd(-ARENA+2,ARENA-2),.02,rnd(-ARENA+2,ARENA-2)],false);c.rotation.y=rnd(0,3);arena.add(c)}
-  const pm=M(0x3a3646),fm=B(0xff7a20);for(let i=0;i<12;i++){const a=i/12*Math.PI*2,g=new T.Group();g.position.set(Math.cos(a)*(ARENA+1.5),0,Math.sin(a)*(ARENA+1.5));const h=rnd(4,8);
-   g.add(mesh(new T.CylinderGeometry(.7,.9,h,6),pm,[0,h/2,0],false));if(i%2==0){const f=mesh(new T.ConeGeometry(.45,1.2,6),fm,[0,h+.6,0],false);g.add(f);fires.push(f)}arena.add(g)}
-  for(let i=0;i<8;i++){const a=rnd(0,6.3);arena.add(mesh(new T.BoxGeometry(rnd(3,6),rnd(8,16),rnd(3,6)),M(0x1d1a26),[Math.cos(a)*rnd(26,36),4,Math.sin(a)*rnd(26,36)],false))}}
+ if(p=='castle'){const s0=seed;buildCastle(st);seed=s0;for(let i=0;i<210;i++)rand()}// pass15: own PRNG, then advance global seed exactly as the old castle block did (obstacle positions unchanged)
  obs=[];const OB={forest:p=='forest'?mkForestOB():null,cave:p=='cave'?mkCaveOB():null,
   snow:p=='snow'?mkSnowOB():null,desert:p=='desert'?mkDesertOB():null,
   swamp:p=='swamp'?mkSwampOB():null,volcano:p=='volcano'?mkVolcanoOB():null,
-  grave:p=='grave'?mkGraveOB():null,castle:[[new T.CylinderGeometry(.9,1.1,6,6),0x3a3646,1.1,[0,3,0]],[new T.BoxGeometry(1.8,1.2,1.8),0x2a2632,1.2,[0,.6,0]]]}[p];
+  grave:p=='grave'?mkGraveOB():null,castle:p=='castle'?mkCastleOB():null}[p];
  const NOB=34,dm=new T.Object3D(),tc=new T.Color();OB.forEach(([geo,col,rad,off,glow],k)=>{const vs=Array.isArray(geo)?geo.map(g=>{const v=new T.InstancedMesh(g,glow&&glow.isMaterial?glow:M(0xffffff,{vertexColors:true,roughness:.92}),NOB/2);v.castShadow=true;v.receiveShadow=true;v.count=0;return v}):null;const im=vs?null:new T.InstancedMesh(geo,glow?B(col):M(col),NOB/2);if(im)im.castShadow=true;let c=0,tries=0;
   while(c<NOB/2&&tries++<400){const a=rnd(0,6.28),r=rnd(7,ARENA-2.5),x=Math.cos(a)*r,z=Math.sin(a)*r,sc=rnd(.8,1.4);if(obs.some(o=>Math.hypot(o.x-x,o.z-z)<o.r+rad*sc+2.2))continue;
    dm.position.set(x+off[0],off[1]*sc,z+off[2]);dm.rotation.set(0,rnd(0,6.3),0);dm.scale.setScalar(sc);dm.updateMatrix();const tim=vs?vs[c%vs.length]:im,ti=vs?tim.count++:c;tim.setMatrixAt(ti,dm.matrix);if(vs){const hv=Math.sin(c*91.7+k*13.1)*4375.85,v=.86+.26*(hv-Math.floor(hv));tim.setColorAt(ti,tc.setRGB(v,v,v*.97))}const lo=dm.clone();lo.scale.set(sc,sc*.12,sc);lo.position.y=off[1]*sc*.12;lo.updateMatrix();obs.push({x,z,r:rad*sc,im:tim,i:ti,m:dm.matrix.clone(),ml:lo.matrix.clone(),low:false});c++}
   if(vs)vs.forEach(v=>{if(v.instanceColor)v.instanceColor.needsUpdate=true;arena.add(v)});else{im.count=c;arena.add(im)}});
+ if(p=='castle')castleOBFlames();// pass15
  const n=Math.round(st.part.n*1.6),pp=new Float32Array(n*3);for(let i=0;i<n;i++){pp[i*3]=rnd(-34,34);pp[i*3+1]=rnd(0,10);pp[i*3+2]=rnd(-34,34)}
  particles=new T.Points(new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(pp,3)),new T.PointsMaterial({map:dot,color:st.part.c,size:st.part.mode=='snow'?.22:.28,blending:st.part.mode=='snow'?T.NormalBlending:T.AdditiveBlending,transparent:true,depthWrite:false}));particles.mode=st.part.mode;arena.add(particles);
  const dp=new Float32Array(150*3);for(let i=0;i<150;i++){dp[i*3]=rnd(-30,30);dp[i*3+1]=rnd(.2,3);dp[i*3+2]=rnd(-30,30)}
