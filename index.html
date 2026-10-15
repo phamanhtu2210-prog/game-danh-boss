@@ -6,9 +6,29 @@
 :root{--u:min(1vw,1.78vh);--gold:#e8c56a;--gold2:#ffd24a;--ink:#0a1028}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;overflow:hidden;background:#000;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",Arial,sans-serif;letter-spacing:.2px;touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:none}
-canvas{display:block;position:fixed;inset:0}
-#grade{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 55%,transparent 62%,#05081a77 100%),linear-gradient(160deg,#ff8a3a14,transparent 40%,#2050ff1a)}
-#vig{position:fixed;inset:0;pointer-events:none;opacity:0;box-shadow:inset 0 0 calc(var(--u)*14) calc(var(--u)*4) #e01020}
+canvas{display:block;position:fixed;inset:0;filter:contrast(1.045) saturate(1.07) brightness(1.01)}
+/* ===== Post FX (pass20): vignette + grade + soft glow + grain — CSS only, no RTT ===== */
+#grade{position:fixed;inset:0;pointer-events:none;z-index:1;transition:background .35s ease;
+ background:radial-gradient(ellipse at 50% 52%,transparent 58%,#05081a70 100%),linear-gradient(160deg,#ff8a3a12,transparent 42%,#2050ff16)}
+#grade.g-forest{background:radial-gradient(ellipse at 50% 55%,transparent 60%,#08141066 100%),linear-gradient(150deg,#ffc07014,transparent 46%,#2a805018)}
+#grade.g-cave{background:radial-gradient(ellipse at 50% 50%,transparent 52%,#0206108a 100%),linear-gradient(180deg,#2848a01a,transparent 48%,#40e0ff14)}
+#grade.g-snow{background:radial-gradient(ellipse at 50% 55%,transparent 62%,#1a284866 100%),linear-gradient(160deg,#e8f4ff18,transparent 45%,#6090ff14)}
+#grade.g-desert{background:radial-gradient(ellipse at 50% 50%,transparent 58%,#2a140866 100%),linear-gradient(150deg,#ffb0501a,transparent 44%,#ff802010)}
+#grade.g-swamp{background:radial-gradient(ellipse at 50% 55%,transparent 56%,#08120878 100%),linear-gradient(160deg,#70a03014,transparent 45%,#20401818)}
+#grade.g-volcano{background:radial-gradient(ellipse at 50% 48%,transparent 54%,#14080880 100%),linear-gradient(155deg,#ff602018,transparent 42%,#ff904012)}
+#grade.g-grave{background:radial-gradient(ellipse at 50% 50%,transparent 54%,#060a1488 100%),linear-gradient(170deg,#4060a016,transparent 48%,#40ffd012)}
+#grade.g-castle{background:radial-gradient(ellipse at 50% 48%,transparent 55%,#0a061488 100%),linear-gradient(160deg,#ff4a1a14,transparent 40%,#4a60ff18)}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:1;
+ background:radial-gradient(ellipse at 50% 48%,transparent 48%,#00000038 78%,#00000066 100%);opacity:.72}
+#glow{position:fixed;inset:0;pointer-events:none;z-index:1;
+ background:radial-gradient(ellipse at 50% 40%,#ffffff22 0%,#ffd08010 22%,transparent 48%);
+ mix-blend-mode:soft-light;opacity:.5}
+#glow.hot{background:radial-gradient(ellipse at 50% 42%,#ffb06028 0%,#ff602010 28%,transparent 50%);opacity:.58}
+#glow.cool{background:radial-gradient(ellipse at 50% 42%,#a0c8ff20 0%,#4060ff10 26%,transparent 50%);opacity:.48}
+#grain{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.028;
+ background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+ background-size:180px 180px;mix-blend-mode:overlay}
+#vig{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:0;box-shadow:inset 0 0 calc(var(--u)*14) calc(var(--u)*4) #e01020}
 #pops{position:fixed;inset:0;pointer-events:none;overflow:hidden}
 #hud{position:fixed;inset:0;pointer-events:none;color:#fff;display:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 #hud.on{display:block}
@@ -122,7 +142,7 @@ canvas{display:block;position:fixed;inset:0}
 .s3{right:clamp(6px,2.2vmin,12px);bottom:clamp(160px,55.5vmin,230px)}
 }
 </style></head><body>
-<div id="grade"></div><div id="vig"></div><div id="pops"></div>
+<div id="grade"></div><div id="vignette"></div><div id="glow"></div><div id="grain"></div><div id="vig"></div><div id="pops"></div>
 <div id="hud">
  <div id="jzone"></div>
  <div class="tl"><div class="av">⚔️</div><div><div class="lv" id="lvT">Lv 1 · Khang</div>
@@ -80452,7 +80472,7 @@ return {...CORE, ACESFilmicToneMapping, AddEquation, AddOperation, AdditiveBlend
 const $=id=>document.getElementById(id);
 const MOBILE=matchMedia('(pointer:coarse)').matches;
 const R=new T.WebGLRenderer({antialias:!MOBILE,powerPreference:'high-performance'});R.setPixelRatio(Math.min(devicePixelRatio,1.5));R.setSize(innerWidth,innerHeight);
-R.shadowMap.enabled=true;R.shadowMap.type=T.PCFShadowMap;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.2;document.body.prepend(R.domElement);
+R.shadowMap.enabled=true;R.shadowMap.type=T.PCFShadowMap;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.18;document.body.prepend(R.domElement);
 const S=new T.Scene();const C=new T.PerspectiveCamera(50,innerWidth/innerHeight,.1,150);
 const hemi=new T.HemisphereLight(0xffffff,0x222222,1);S.add(hemi);
 const key=new T.DirectionalLight(0xffa25a,2.4);key.castShadow=true;key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-14,right:14,top:14,bottom:-14,near:1,far:60});S.add(key,key.target);
@@ -81506,7 +81526,10 @@ function buildCastle(st){const K=castleKit(9973),{r,R,P,MG,X,L2W,lerpC,ST,DK,MOS
 }
 function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geometry.dispose()});arena=new T.Group();S.add(arena);fires=[];sway=[];swayMats=[];seed=7+st.idx*13;
  S.background=new T.Color(st.bg);S.fog=new T.Fog(st.fog[0],st.fog[1]*1.3,st.fog[2]*1.5);hemi.color.set(st.hemi[0]);hemi.groundColor.set(st.hemi[1]);hemi.intensity=st.hemi[2];
- key.color.set(st.key[0]);key.intensity=st.key[1]*1.2;rim.color.set(st.rim[0]);rim.intensity=st.rim[1]*1.5;R.toneMappingExposure=1.15;
+ key.color.set(st.key[0]);key.intensity=st.key[1]*1.2;rim.color.set(st.rim[0]);rim.intensity=st.rim[1]*1.5;
+ /* pass20: per-stage exposure + CSS grade/glow (no EffectComposer / RTT) */
+ {const FX={forest:1.19,cave:1.06,snow:1.23,desert:1.21,swamp:1.11,volcano:1.15,grave:1.08,castle:1.13};R.toneMappingExposure=window.__fxExp=FX[st.props]||1.15;
+  const g=$('grade'),gl=$('glow');if(g){g.className='g-'+st.props}if(gl){gl.className=(st.props=='volcano'||st.props=='desert'||st.props=='castle')?'hot':(st.props=='cave'||st.props=='snow'||st.props=='grave')?'cool':'';}}
  const p0=st.props;const fl=new T.Mesh(new T.CylinderGeometry(ARENA+1,ARENA+2,1,14),M(st.ground));fl.position.y=-.501;fl.receiveShadow=true;arena.add(fl);
  const top=new T.Mesh(new T.CircleGeometry(ARENA+1,48),new T.MeshStandardMaterial({map:groundTex(st),roughness:.95}));top.rotation.x=-Math.PI/2;top.position.y=.005;top.receiveShadow=true;arena.add(top);
  {const cols=[st.ground,st.ring].map(c=>new T.Color(c));const dg=p0=='castle'?new T.DodecahedronGeometry(.13,0).scale(1,.5,1).translate(0,-.13,0):new T.ConeGeometry(.12,.45,3),im=new T.InstancedMesh(dg,M(new T.Color(st.ground).lerp(new T.Color(0xffffff),.12)),220),d=new T.Object3D();
