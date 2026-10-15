@@ -81614,7 +81614,7 @@ body.add(mesh(new T.BoxGeometry(.88,.13,.6),mLeather,[0,.6,0]));// belt
 body.add(mesh(new T.BoxGeometry(.22,.18,.1),mGold,[0,.6,-.32]));// buckle
 body.add(mesh(new T.BoxGeometry(.08,.08,.06),mTrim,[0,.6,-.37]));// buckle jewel
 body.add(mesh(new T.BoxGeometry(.14,.2,.08),mLeather,[-.28,.48,-.05]));body.add(mesh(new T.BoxGeometry(.14,.2,.08),mLeather,[.28,.48,-.05]));// belt pouches
-const headG=new T.Group();headG.position.set(0,1.9,0);body.add(headG);
+const headG=new T.Group();headG.position.set(0,1.9,0);body.add(headG);// neck height; face on -Z (forward)
 headG.add(mesh(new T.SphereGeometry(.3,10,8),mSkin,[0,0,0]));
 headG.add(mesh(new T.SphereGeometry(.32,8,6),mHair,[0,.14,.1]));// hair volume toward back (+Z)
 headG.add(mesh(new T.SphereGeometry(.18,6,5),mHair,[0,.22,.02]));// top hair
@@ -82442,11 +82442,13 @@ function step(dt){G.time+=dt;const t=G.time;
   const ca=capeGeo.attributes.position;const capeAmp=dashing?.85:mvg?.55:.15;const capeSpd=dashing?14:mvg?10:3;
   for(let i=0;i<ca.count;i++){const y=capeBase[i*3+1],x=capeBase[i*3];const w=-y/1.5;ca.setZ(i,capeBase[i*3+2]+w*w*capeAmp+Math.sin(t*capeSpd+y*4+x*2)*.07*w);}ca.needsUpdate=true;capeGeo.computeVertexNormals();
   /* run cycle / idle breath / dash stretch / hit flinch — visual only */
-  if(G.mode=='menu'){const br=1+Math.sin(t*2.2)*.018;body.scale.set(1,br,1);legL.rotation.x=legR.rotation.x=armL.rotation.x=0;headG.position.y=0;armL.rotation.z=Math.sin(t*1.6)*.08}
-  else if(dashing){const k=dashT/.22;body.scale.set(1.05-k*.05,.88+k*.12,1.22-k*.18);legL.rotation.x=-.55;legR.rotation.x=.35;armL.rotation.x=.6;if(!swinging){armR.rotation.x=-.35;armR.rotation.z=.2}headG.rotation.x=.15;body.rotation.x=-.2}
-  else if(hurtT<.22){const hk=1-hurtT/.22;body.scale.set(1.08+hk*.06,.9-hk*.05,1.05);body.position.z=.12*hk;body.rotation.x=.18*hk;headG.rotation.x=-.2*hk;legL.rotation.x=legR.rotation.x=-.15*hk;armL.rotation.x=-.4*hk}
-  else if(mvg&&!swinging){const cycle=t*11;const sw=Math.sin(cycle);legL.rotation.x=sw*.7;legR.rotation.x=-sw*.7;armL.rotation.x=-sw*.55;armR.rotation.x=sw*.35;armL.rotation.z=.08;body.rotation.z=sw*.06;body.rotation.x=-.08;headG.position.y=Math.abs(Math.sin(cycle))*.04;headG.rotation.x=Math.sin(cycle*2)*.05;const br=1+Math.sin(cycle)*.02;body.scale.set(1/Math.sqrt(br),br,1/Math.sqrt(br));if(Math.random()<dt*14)footDust(hero.position)}
-  else if(!mvg&&!swinging&&!dashing){const br=1+Math.sin(t*2.2)*.018;body.scale.set(1,br,1);body.position.z=0;body.rotation.z*=.85;legL.rotation.x*=.85;legR.rotation.x*=.85;armL.rotation.x*=.85;armL.rotation.z=Math.sin(t*1.8)*.06;if(slashT>.35&&spinT>=.5)armR.rotation.x*=.85;headG.position.y=Math.sin(t*2.2)*.015;headG.rotation.x*=.9}
+  /* headYBase: pass17 bob had overwritten headG.y to ~0 (head at feet); keep bob as offset from neck */
+  const headYBase=1.9;
+  if(G.mode=='menu'){const br=1+Math.sin(t*2.2)*.018;body.scale.set(1,br,1);legL.rotation.x=legR.rotation.x=armL.rotation.x=0;headG.position.y=headYBase;armL.rotation.z=Math.sin(t*1.6)*.08}
+  else if(dashing){const k=dashT/.22;body.scale.set(1.05-k*.05,.88+k*.12,1.22-k*.18);legL.rotation.x=-.55;legR.rotation.x=.35;armL.rotation.x=.6;if(!swinging){armR.rotation.x=-.35;armR.rotation.z=.2}headG.rotation.x=.15;headG.position.y=headYBase;body.rotation.x=-.2}
+  else if(hurtT<.22){const hk=1-hurtT/.22;body.scale.set(1.08+hk*.06,.9-hk*.05,1.05);body.position.z=.12*hk;body.rotation.x=.18*hk;headG.rotation.x=-.2*hk;headG.position.y=headYBase;legL.rotation.x=legR.rotation.x=-.15*hk;armL.rotation.x=-.4*hk}
+  else if(mvg&&!swinging){const cycle=t*11;const sw=Math.sin(cycle);legL.rotation.x=sw*.7;legR.rotation.x=-sw*.7;armL.rotation.x=-sw*.55;armR.rotation.x=sw*.35;armL.rotation.z=.08;body.rotation.z=sw*.06;body.rotation.x=-.08;headG.position.y=headYBase+Math.abs(Math.sin(cycle))*.04;headG.rotation.x=Math.sin(cycle*2)*.05;const br=1+Math.sin(cycle)*.02;body.scale.set(1/Math.sqrt(br),br,1/Math.sqrt(br));if(Math.random()<dt*14)footDust(hero.position)}
+  else if(!mvg&&!swinging&&!dashing){const br=1+Math.sin(t*2.2)*.018;body.scale.set(1,br,1);body.position.z=0;body.rotation.z*=.85;legL.rotation.x*=.85;legR.rotation.x*=.85;armL.rotation.x*=.85;armL.rotation.z=Math.sin(t*1.8)*.06;if(slashT>.35&&spinT>=.5)armR.rotation.x*=.85;headG.position.y=headYBase+Math.sin(t*2.2)*.015;headG.rotation.x*=.9}
   else{body.position.z=0;if(!dashing){const br=1+Math.sin(t*2.2)*.01;body.scale.set(1,br,1);if(slashT>.32)body.rotation.x=0}}
   if(hurtT>=.22&&!dashing)body.position.z*=.8
   if(dodgeT<.35){legL.rotation.x=legR.rotation.x=armL.rotation.x=armL.rotation.z=0;armR.rotation.x=armR.rotation.y=armR.rotation.z=0;headG.rotation.x=0;body.scale.set(1,1,1)}}
