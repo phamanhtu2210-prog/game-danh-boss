@@ -80435,12 +80435,15 @@ const persist=()=>{try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch
 const stats=()=>({maxHp:1000+(save.lv-1)*250,atk:1+(save.lv-1)*.15});
 window.save=save;
 // ================= ARENA
-let dust2=null;let arena=new T.Group();S.add(arena);let particles=null,fires=[];
+let dust2=null;let arena=new T.Group();S.add(arena);let particles=null,fires=[],sway=[],swayMats=[];
 function groundTex(st){const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');const base=new T.Color(st.ground);x.fillStyle='#'+base.getHexString();x.fillRect(0,0,512,512);
  for(let i=0;i<2600;i++){const k=rand();const col=base.clone().multiplyScalar(.82+k*.36);x.fillStyle='#'+col.getHexString();const r=rnd(2,14);x.globalAlpha=.35;x.beginPath();x.arc(rnd(0,512),rnd(0,512),r,0,7);x.fill()}
+ if(st.props=='forest'||st.props=='swamp'){x.globalAlpha=.42;for(let i=0;i<6;i++){const dirt=base.clone().lerp(new T.Color(st.props=='swamp'?0x3a4028:0x6a5030),.55);x.strokeStyle='#'+dirt.getHexString();x.lineWidth=rnd(10,22);x.lineCap='round';x.beginPath();let px=rnd(40,472),py=rnd(40,472);x.moveTo(px,py);for(let s=0;s<10;s++){px+=rnd(-48,48);py+=rnd(-48,48);x.lineTo(Math.max(8,Math.min(504,px)),Math.max(8,Math.min(504,py)))}x.stroke()}
+  for(let i=0;i<55;i++){const gcol=base.clone().lerp(new T.Color(st.props=='swamp'?0x2a6030:0x2a8a28),.45).multiplyScalar(.85+rand()*.3);x.fillStyle='#'+gcol.getHexString();x.globalAlpha=.28;x.beginPath();x.ellipse(rnd(0,512),rnd(0,512),rnd(12,42),rnd(8,26),rnd(0,3),0,7);x.fill()}
+  if(st.props=='forest'){for(let i=0;i<30;i++){x.globalAlpha=.2;x.fillStyle='#'+base.clone().lerp(new T.Color(0x8a7a40),.35).getHexString();x.beginPath();x.arc(rnd(0,512),rnd(0,512),rnd(3,8),0,7);x.fill()}}}
  x.globalAlpha=.10;x.strokeStyle='#'+new T.Color(st.ring).getHexString();x.lineWidth=2;for(let i=0;i<=512;i+=64){x.beginPath();x.moveTo(i,0);x.lineTo(i,512);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(512,i);x.stroke()}
  x.globalAlpha=1;const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(7,7);t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;return t}
-function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geometry.dispose()});arena=new T.Group();S.add(arena);fires=[];seed=7+st.idx*13;
+function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geometry.dispose()});arena=new T.Group();S.add(arena);fires=[];sway=[];swayMats=[];seed=7+st.idx*13;
  S.background=new T.Color(st.bg);S.fog=new T.Fog(st.fog[0],st.fog[1]*1.3,st.fog[2]*1.5);hemi.color.set(st.hemi[0]);hemi.groundColor.set(st.hemi[1]);hemi.intensity=st.hemi[2];
  key.color.set(st.key[0]);key.intensity=st.key[1]*1.2;rim.color.set(st.rim[0]);rim.intensity=st.rim[1]*1.5;R.toneMappingExposure=1.15;
  const fl=new T.Mesh(new T.CylinderGeometry(ARENA+1,ARENA+2,1,14),M(st.ground));fl.position.y=-.501;fl.receiveShadow=true;arena.add(fl);
@@ -80450,11 +80453,41 @@ function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geome
  const out=new T.Mesh(new T.CircleGeometry(70,20),M(new T.Color(st.ground).multiplyScalar(.6)));out.rotation.x=-Math.PI/2;out.position.y=-1;arena.add(out);
  const ring=new T.Mesh(new T.RingGeometry(ARENA-.4,ARENA,56),B(st.ring,{transparent:true,opacity:.5}));ring.rotation.x=-Math.PI/2;ring.position.y=.02;arena.add(ring);
  const p=st.props;
- if(p=='forest'){const tm=M(0x5a3b25),cs=[0x2f6b3a,0x3d7d3a,0x8a5a2e,0x245a40].map(c=>M(c));
-  for(let i=0;i<22;i++){const a=rnd(0,6.28),r=rnd(ARENA+1,30),g=new T.Group();g.position.set(Math.cos(a)*r,0,Math.sin(a)*r);const s=rnd(1,1.8);
-   g.add(mesh(new T.CylinderGeometry(.3*s,.45*s,2*s,5),tm,[0,s,0],false));g.add(mesh(new T.ConeGeometry(1.9*s,3.4*s,6),cs[i%4],[0,2.6*s,0],false));g.add(mesh(new T.ConeGeometry(1.3*s,2.4*s,6),cs[i%4],[0,4.2*s,0],false));arena.add(g)}
-  const fm=[M(0xff6aa0),M(0xffe060),M(0xffffff)];for(let i=0;i<40;i++)arena.add(mesh(new T.SphereGeometry(.12,5,4),fm[i%3],[rnd(-ARENA+2,ARENA-2),.12,rnd(-ARENA+2,ARENA-2)],false));
-  for(let i=0;i<8;i++)arena.add(mesh(new T.DodecahedronGeometry(rnd(.4,1),0),M(0x7a7a85),[rnd(-ARENA+2,ARENA-2),.2,rnd(-ARENA+2,ARENA-2)],false))}
+ if(p=='forest'){const bark=M(0x5a3b25),barkD=M(0x3a2818),barkB=M(0xd4cbb8),band=M(0x2a2a28);
+  const leafs=[0x2f6b3a,0x3d8a45,0x245a30,0x4a9a38,0x1e5030].map(c=>M(c));
+  const pine=[M(0x1a4a28),M(0x2a6a38),M(0x3a8040)];const moss=M(0x4a7840),rockM=M(0x6a6a72),rockMoss=M(0x5a7850);
+  const mkWind=mat=>{mat.onBeforeCompile=sh=>{sh.uniforms.uW={value:0};sh.vertexShader='uniform float uW;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfloat _wh=max(transformed.y,0.);transformed.x+=sin(uW*1.6+instanceMatrix[3][0]*.35)*_wh*.12;transformed.z+=cos(uW*1.3+instanceMatrix[3][2]*.35)*_wh*.1;');mat.userData._ws=sh};swayMats.push(mat);return mat};
+  for(let i=0;i<28;i++){const a=rnd(0,6.28),r=rnd(ARENA+1.3,34),g=new T.Group();g.position.set(Math.cos(a)*r,0,Math.sin(a)*r);const s=rnd(.95,1.85),kind=i%3;
+   if(kind==0){g.add(mesh(new T.CylinderGeometry(.2*s,.36*s,2.4*s,6),barkD,[0,1.2*s,0],false));
+    for(let k=0;k<3;k++){const ang=k*2.094,rt=mesh(new T.CylinderGeometry(.05*s,.13*s,.55*s,4),barkD,[Math.cos(ang)*.38*s,.18*s,Math.sin(ang)*.38*s],false);rt.rotation.z=Math.cos(ang)*.75;rt.rotation.x=Math.sin(ang)*.75;g.add(rt)}
+    const can=new T.Group();g.add(can);for(let L=0;L<4;L++){const yy=(1.9+L*1.1)*s,rr=(2.05-L*.38)*s,hh=(1.75-L*.12)*s;can.add(mesh(new T.ConeGeometry(rr,hh,7),pine[L%3],[0,yy,0],false))}
+    can.userData.ph=rnd(0,6);can.userData.amp=.7;sway.push(can)}
+   else if(kind==1){g.add(mesh(new T.CylinderGeometry(.26*s,.4*s,2.5*s,6),bark,[0,1.25*s,0],false));
+    for(let k=0;k<3;k++){const ang=k*2.094,rt=mesh(new T.CylinderGeometry(.05*s,.12*s,.5*s,4),bark,[Math.cos(ang)*.42*s,.14*s,Math.sin(ang)*.42*s],false);rt.rotation.z=Math.cos(ang)*.7;rt.rotation.x=Math.sin(ang)*.7;g.add(rt)}
+    const can=new T.Group();can.position.y=2.9*s;g.add(can);for(let L=0;L<6;L++){const bl=mesh(new T.IcosahedronGeometry((.85+L*.08)*s*.75,0),leafs[(i+L)%5],[rnd(-.7,.7)*s,rnd(-.35,.9)*s,rnd(-.7,.7)*s],false);bl.scale.set(rnd(.85,1.35),rnd(.65,1.05),rnd(.85,1.35));can.add(bl)}
+    can.userData.ph=rnd(0,6);can.userData.amp=1;sway.push(can)}
+   else{g.add(mesh(new T.CylinderGeometry(.16*s,.26*s,3.1*s,6),barkB,[0,1.55*s,0],false));
+    for(let b=0;b<5;b++)g.add(mesh(new T.CylinderGeometry(.17*s,.17*s,.07*s,6),band,[0,(.55+b*.55)*s,0],false));
+    for(let k=0;k<2;k++){const ang=k*3.14+.4,rt=mesh(new T.CylinderGeometry(.04*s,.1*s,.4*s,4),barkB,[Math.cos(ang)*.3*s,.12*s,Math.sin(ang)*.3*s],false);rt.rotation.z=Math.cos(ang)*.65;rt.rotation.x=Math.sin(ang)*.65;g.add(rt)}
+    const can=new T.Group();can.position.y=3.3*s;g.add(can);for(let L=0;L<4;L++){const bl=mesh(new T.IcosahedronGeometry(.65*s,0),leafs[(i+L+2)%5],[rnd(-.45,.45)*s,rnd(-.2,.55)*s,rnd(-.45,.45)*s],false);bl.scale.set(rnd(.9,1.25),rnd(.7,1),rnd(.9,1.25));can.add(bl)}
+    can.userData.ph=rnd(0,6);can.userData.amp=.85;sway.push(can)}
+   arena.add(g)}
+  for(let i=0;i<14;i++){const a=rnd(0,6.28),r=rnd(ARENA+.9,ARENA+7),bg=new T.Group();bg.position.set(Math.cos(a)*r,0,Math.sin(a)*r);
+   for(let k=0;k<4;k++){const bl=mesh(new T.IcosahedronGeometry(rnd(.35,.65),0),leafs[k%5],[rnd(-.35,.35),rnd(.25,.65),rnd(-.35,.35)],false);bl.scale.y=rnd(.55,.9);bg.add(bl)}
+   bg.userData.ph=rnd(0,6);bg.userData.amp=.55;sway.push(bg);arena.add(bg)}
+  {const gMat=mkWind(M(0x3a8a32)),gGeo=new T.ConeGeometry(.07,.5,3),gim=new T.InstancedMesh(gGeo,gMat,200),d=new T.Object3D();let c=0;
+   for(let i=0;i<200;i++){const a=rnd(0,6.28),r=i<140?rnd(ARENA-11,ARENA-1.2):rnd(ARENA+1,ARENA+8);d.position.set(Math.cos(a)*r,.22,Math.sin(a)*r);d.rotation.set(rnd(-.2,.2),rnd(0,6),rnd(-.2,.2));d.scale.set(rnd(.7,1.5),rnd(.8,1.8),rnd(.7,1.5));d.updateMatrix();gim.setMatrixAt(c++,d.matrix)}gim.count=c;arena.add(gim)}
+  {const flCols=[0xff6aa0,0xffe060,0xffffff,0xff9040,0xc070ff];const flGeo=new T.SphereGeometry(.09,5,4);
+   for(const col of flCols){const im=new T.InstancedMesh(flGeo,M(col),10),d=new T.Object3D();let c=0;for(let i=0;i<10;i++){const a=rnd(0,6.28),r=rnd(ARENA-9,ARENA-1.5);d.position.set(Math.cos(a)*r,.1,Math.sin(a)*r);d.scale.setScalar(rnd(.7,1.35));d.updateMatrix();im.setMatrixAt(c++,d.matrix)}im.count=c;arena.add(im)}}
+  for(let i=0;i<10;i++){const a=rnd(0,6.28),r=rnd(ARENA-13,ARENA-2),rk=new T.Group();rk.position.set(Math.cos(a)*r,0,Math.sin(a)*r);const sz=rnd(.35,.95);
+   rk.add(mesh(new T.DodecahedronGeometry(sz,0),i%3?rockM:rockMoss,[0,sz*.32,0],false));if(i%2==0){const m=mesh(new T.SphereGeometry(sz*.38,5,4),moss,[rnd(-.15,.15),sz*.55,rnd(-.15,.15)],false);m.scale.y=.45;rk.add(m)}arena.add(rk)}
+  for(let i=0;i<11;i++){const a=rnd(0,6.28),r=rnd(ARENA+9,44),h=mesh(new T.SphereGeometry(rnd(4.5,10),7,5),M(new T.Color(st.ground).multiplyScalar(.72)),[Math.cos(a)*r,-2,Math.sin(a)*r],false);h.scale.y=rnd(.22,.4);arena.add(h)}
+  {const pondA=rnd(0,6.28),pondR=ARENA+3.2,px=Math.cos(pondA)*pondR,pz=Math.sin(pondA)*pondR;
+   const w1=new T.Mesh(new T.CircleGeometry(3.4,22),B(0x3a8aaa,{transparent:true,opacity:.55}));w1.rotation.x=-Math.PI/2;w1.position.set(px,.04,pz);arena.add(w1);
+   const w2=new T.Mesh(new T.CircleGeometry(2.3,16),B(0x2a6088,{transparent:true,opacity:.4}));w2.rotation.x=-Math.PI/2;w2.position.set(px,.055,pz);arena.add(w2);
+   for(let i=0;i<14;i++){const aa=i/14*6.28+rnd(-.12,.12),rr=3.35+rnd(-.35,.45);arena.add(mesh(new T.DodecahedronGeometry(rnd(.22,.5),0),rockM,[px+Math.cos(aa)*rr,.1,pz+Math.sin(aa)*rr],false))}
+   const streamDir=pondA+Math.PI*.15;for(let i=0;i<5;i++){const sr=pondR+2.2+i*1.6,sx=Math.cos(streamDir)*sr,sz=Math.sin(streamDir)*sr;const seg=new T.Mesh(new T.CircleGeometry(1.1-i*.12,12),B(0x3a8aaa,{transparent:true,opacity:.4}));seg.rotation.x=-Math.PI/2;seg.position.set(sx,.03,sz);arena.add(seg);arena.add(mesh(new T.DodecahedronGeometry(.28,0),rockM,[sx+rnd(-.9,.9),.08,sz+rnd(-.9,.9)],false))}}
+ }
  if(p=='cave'){const rm=M(0x2a2638),cm=B(0x40e0ff),cm2=B(0xb060ff);
   for(let i=0;i<26;i++){const a=rnd(0,6.28),r=rnd(ARENA+.5,24),h=rnd(3,9);arena.add(mesh(new T.ConeGeometry(rnd(.8,1.8),h,5),rm,[Math.cos(a)*r,h/2,Math.sin(a)*r],false));
    const t=mesh(new T.ConeGeometry(rnd(.6,1.4),h,5),rm,[Math.cos(a+.1)*r,14-h/2,Math.sin(a+.1)*r],false);t.rotation.x=Math.PI;arena.add(t)}
@@ -80474,12 +80507,27 @@ function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geome
   for(let i=0;i<10;i++){const a=rnd(0,6.28),d=mesh(new T.SphereGeometry(rnd(5,10),8,5),sm,[Math.cos(a)*rnd(26,40),-2,Math.sin(a)*rnd(26,40)],false);d.scale.y=.4;arena.add(d)}
   for(let i=0;i<6;i++){const a=i/6*6.28+.3;arena.add(mesh(new T.BoxGeometry(1.2,rnd(3,6),1.2),pm,[Math.cos(a)*(ARENA+2),2,Math.sin(a)*(ARENA+2)],false))}
   for(let i=0;i<8;i++)arena.add(mesh(new T.DodecahedronGeometry(rnd(.4,1),0),sm,[rnd(-ARENA+2,ARENA-2),.2,rnd(-ARENA+2,ARENA-2)],false))}
- if(p=='swamp'){const tm=M(0x3a2a1a),wm=B(0x2a6a30,{transparent:true,opacity:.75}),lm=M(0x5aa040);
-  for(let i=0;i<20;i++){const a=rnd(0,6.28),r=rnd(ARENA+1,28),g=new T.Group();g.position.set(Math.cos(a)*r,0,Math.sin(a)*r);const h=rnd(3,6);g.add(mesh(new T.CylinderGeometry(.2,.5,h,5),tm,[0,h/2,0],false));
-   for(let k=0;k<3;k++){const br=mesh(new T.CylinderGeometry(.06,.12,1.6,4),tm,[0,h*.7,0],false);br.rotation.set(rnd(-1,1),rnd(0,3),rnd(.6,1.2));g.add(br)}arena.add(g)}
-  for(let i=0;i<7;i++){const w=new T.Mesh(new T.CircleGeometry(rnd(1.5,3.5),14),wm);w.rotation.x=-Math.PI/2;w.position.set(rnd(-ARENA+2,ARENA-2),.03,rnd(-ARENA+2,ARENA-2));arena.add(w);
-   for(let k=0;k<3;k++){const l=new T.Mesh(new T.CircleGeometry(.35,8),lm);l.rotation.x=-Math.PI/2;l.position.set(w.position.x+rnd(-1.5,1.5),.05,w.position.z+rnd(-1.5,1.5));arena.add(l)}}
-  for(let i=0;i<30;i++)arena.add(mesh(new T.ConeGeometry(.06,rnd(.6,1.2),3),lm,[rnd(-ARENA+2,ARENA-2),.4,rnd(-ARENA+2,ARENA-2)],false))}
+ if(p=='swamp'){const tm=M(0x3a2a1a),tm2=M(0x2a1a10),wm=B(0x2a5a28,{transparent:true,opacity:.72}),wm2=B(0x1a4020,{transparent:true,opacity:.45});
+  const lm=M(0x5aa040),lm2=M(0x3a7030),moss=M(0x4a6830,{transparent:true,opacity:.85}),reed=M(0x4a6a28),rockM=M(0x4a5a3a);
+  const mkWind=mat=>{mat.onBeforeCompile=sh=>{sh.uniforms.uW={value:0};sh.vertexShader='uniform float uW;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfloat _wh=max(transformed.y,0.);transformed.x+=sin(uW*1.4+instanceMatrix[3][0]*.4)*_wh*.14;transformed.z+=cos(uW*1.1+instanceMatrix[3][2]*.4)*_wh*.11;');mat.userData._ws=sh};swayMats.push(mat);return mat};
+  for(let i=0;i<22;i++){const a=rnd(0,6.28),r=rnd(ARENA+1.2,30),g=new T.Group();g.position.set(Math.cos(a)*r,0,Math.sin(a)*r);const h=rnd(3.2,6.5),s=rnd(.85,1.3);
+   g.add(mesh(new T.CylinderGeometry(.16*s,.48*s,h,5),i%2?tm:tm2,[0,h/2,0],false));
+   for(let k=0;k<2;k++){const ang=k*2.2+rnd(-.3,.3),rt=mesh(new T.CylinderGeometry(.04*s,.12*s,.55*s,4),tm,[Math.cos(ang)*.4*s,.2*s,Math.sin(ang)*.4*s],false);rt.rotation.z=Math.cos(ang)*.8;rt.rotation.x=Math.sin(ang)*.8;g.add(rt)}
+   const brs=new T.Group();brs.position.y=h*.72;g.add(brs);
+   for(let k=0;k<4;k++){const br=mesh(new T.CylinderGeometry(.05,.1,1.5*s,4),tm,[0,0,0],false);br.rotation.set(rnd(-.9,.9),rnd(0,3),rnd(.5,1.3));brs.add(br);
+    if(k<3){const ms=mesh(new T.CylinderGeometry(.02,.08,rnd(.6,1.2),4),moss,[0,-.4,0],false);ms.position.copy(br.position);ms.rotation.copy(br.rotation);brs.add(ms)}}
+   brs.userData.ph=rnd(0,6);brs.userData.amp=.5;sway.push(brs);arena.add(g)}
+  for(let i=0;i<3;i++){const a=rnd(0,6.28),r=rnd(ARENA-14,ARENA-4);const w=new T.Mesh(new T.CircleGeometry(rnd(1.6,2.8),14),wm);w.rotation.x=-Math.PI/2;w.position.set(Math.cos(a)*r,.03,Math.sin(a)*r);arena.add(w);
+   const w2=new T.Mesh(new T.CircleGeometry(rnd(1,1.8),12),wm2);w2.rotation.x=-Math.PI/2;w2.position.set(w.position.x,.045,w.position.z);arena.add(w2);
+   for(let k=0;k<4;k++){const l=new T.Mesh(new T.CircleGeometry(rnd(.28,.42),8),lm);l.rotation.x=-Math.PI/2;l.position.set(w.position.x+rnd(-1.4,1.4),.055,w.position.z+rnd(-1.4,1.4));arena.add(l)}}
+  for(let i=0;i<5;i++){const a=rnd(0,6.28),r=rnd(ARENA+2,ARENA+10);const w=new T.Mesh(new T.CircleGeometry(rnd(2,3.8),16),wm);w.rotation.x=-Math.PI/2;w.position.set(Math.cos(a)*r,.03,Math.sin(a)*r);arena.add(w);
+   for(let k=0;k<5;k++){const l=new T.Mesh(new T.CircleGeometry(rnd(.3,.45),8),i%2?lm:lm2);l.rotation.x=-Math.PI/2;l.position.set(w.position.x+rnd(-2,2),.05,w.position.z+rnd(-2,2));arena.add(l)}
+   for(let k=0;k<8;k++){const aa=k/8*6.28,rr=w.geometry.parameters.radius+rnd(-.2,.3);arena.add(mesh(new T.DodecahedronGeometry(rnd(.2,.45),0),rockM,[w.position.x+Math.cos(aa)*rr,.1,w.position.z+Math.sin(aa)*rr],false))}}
+  {const rMat=mkWind(reed),rGeo=new T.ConeGeometry(.05,.9,3),rim=new T.InstancedMesh(rGeo,rMat,120),d=new T.Object3D();let c=0;
+   for(let i=0;i<120;i++){const a=rnd(0,6.28),r=i<70?rnd(ARENA-10,ARENA-1.5):rnd(ARENA+1,ARENA+9);d.position.set(Math.cos(a)*r,.4,Math.sin(a)*r);d.rotation.set(rnd(-.15,.15),rnd(0,6),rnd(-.15,.15));d.scale.set(rnd(.7,1.3),rnd(.9,1.7),rnd(.7,1.3));d.updateMatrix();rim.setMatrixAt(c++,d.matrix)}rim.count=c;arena.add(rim)}
+  for(let i=0;i<8;i++){const a=rnd(0,6.28),r=rnd(ARENA-12,ARENA-2);arena.add(mesh(new T.DodecahedronGeometry(rnd(.4,1),0),rockM,[Math.cos(a)*r,.25,Math.sin(a)*r],false))}
+  for(let i=0;i<9;i++){const a=rnd(0,6.28),r=rnd(ARENA+8,40),h=mesh(new T.SphereGeometry(rnd(4,9),7,5),M(new T.Color(st.ground).multiplyScalar(.65)),[Math.cos(a)*r,-2,Math.sin(a)*r],false);h.scale.y=rnd(.2,.38);arena.add(h)}
+ }
  if(p=='volcano'){const rm=M(0x2a1a18),lv=B(0xff5010),lv2=B(0xffa020);
   for(let i=0;i<16;i++){const a=rnd(0,6.28),r=rnd(ARENA+1,26),h=rnd(3,8);arena.add(mesh(new T.ConeGeometry(rnd(1.2,2.5),h,5),rm,[Math.cos(a)*r,h/2,Math.sin(a)*r],false))}
   const v=mesh(new T.CylinderGeometry(6,18,22,8),rm,[-10,6,-45],false);arena.add(v);const vt=mesh(new T.CylinderGeometry(5.5,6,.5,8),lv,[-10,17,-45],false);arena.add(vt);fires.push(vt);
@@ -81215,7 +81263,7 @@ function step(dt){G.time+=dt;const t=G.time;
  if(dt>0){updTele(dt);updOrbs(dt)}
  if(particles){const pe=particles.geometry.attributes.position,md=particles.mode;for(let i=0;i<pe.count;i++){let y=pe.getY(i);
   if(md=='snow'){y-=dt*1.2;pe.setX(i,pe.getX(i)+Math.sin(t+i)*dt*.3);if(y<0)y=10}else if(md=='rise'){y+=dt*.6;if(y>10)y=0}else{y+=Math.sin(t*1.5+i)*dt*.2}pe.setY(i,y)}pe.needsUpdate=true}
- fires.forEach((f,i)=>f.scale.set(1,1+Math.sin(t*15+i)*.15,1));
+ fires.forEach((f,i)=>f.scale.set(1,1+Math.sin(t*15+i)*.15,1));sway.forEach(o=>{const ph=o.userData.ph||0,amp=o.userData.amp||1;o.rotation.z=Math.sin(t*1.3+ph)*.045*amp;o.rotation.x=Math.sin(t*.95+ph*1.3)*.03*amp});swayMats.forEach(m=>{if(m.userData._ws)m.userData._ws.uniforms.uW.value=t});
 if(dt>0)updFx(dt);if(dust2){const pe=dust2.geometry.attributes.position;for(let i=0;i<pe.count;i++)pe.setY(i,pe.getY(i)+Math.sin(t+i)*dt*.15);pe.needsUpdate=true}
  {const b=G.boss;if(b&&!b.dead){bossL.position.copy(b.obj.position).setY(b.h*.6);bossL.color.set(b.col);bossL.intensity=12+Math.sin(t*3)*3}else bossL.intensity=0}
  updPops(dt);if(G.mode=='play'||G.mode=='end')hud(dt);
