@@ -81526,16 +81526,21 @@ function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geome
 // ================= HERO
 const hero=new T.Group();S.add(hero);const body=new T.Group();hero.add(body);
 const heroMats=[];const HM=(c,o)=>{const m=M(c,o);heroMats.push(m);return m};
-body.add(mesh(new T.CylinderGeometry(.35,.45,1.1,8),HM(0x2b4fa0,{metalness:.4,roughness:.5}),[0,1.05,0]));
-body.add(mesh(new T.SphereGeometry(.32,10,8),HM(0xf1c6a0),[0,1.9,0]));body.add(mesh(new T.ConeGeometry(.36,.35,8),HM(0x2a1a12),[0,2.12,0]));
-for(const x of[-.42,.42])body.add(mesh(new T.SphereGeometry(.2,8,6),HM(0xd8b060,{metalness:.6,roughness:.4}),[x,1.5,0]));
-for(const x of[-.18,.18])body.add(mesh(new T.BoxGeometry(.2,.55,.2),HM(0x1e2238),[x,.28,0]));
+// pass17: limb groups for run/attack/dash/flinch (visual only)
+const torso=mesh(new T.CylinderGeometry(.35,.45,1.1,8),HM(0x2b4fa0,{metalness:.4,roughness:.5}),[0,1.05,0]);body.add(torso);
+const headG=new T.Group();headG.position.set(0,1.9,0);body.add(headG);
+headG.add(mesh(new T.SphereGeometry(.32,10,8),HM(0xf1c6a0),[0,0,0]));
+headG.add(mesh(new T.ConeGeometry(.36,.35,8),HM(0x2a1a12),[0,.22,0]));
+headG.add(mesh(new T.CylinderGeometry(.34,.36,.22,10,1,true),HM(0xc8d0e0,{metalness:.8,roughness:.3,side:T.DoubleSide}),[0,.18,0]));
+headG.add(mesh(new T.BoxGeometry(.06,.3,.06),HM(0xe8c56a,{metalness:.8}),[0,.4,-.05]));
+const armL=new T.Group();armL.position.set(-.42,1.5,0);body.add(armL);armL.add(mesh(new T.SphereGeometry(.2,8,6),HM(0xd8b060,{metalness:.6,roughness:.4}),[0,0,0]));
+const armR=new T.Group();armR.position.set(.42,1.5,0);body.add(armR);armR.add(mesh(new T.SphereGeometry(.2,8,6),HM(0xd8b060,{metalness:.6,roughness:.4}),[0,0,0]));
+const legL=new T.Group();legL.position.set(-.18,.55,0);body.add(legL);legL.add(mesh(new T.BoxGeometry(.2,.55,.2),HM(0x1e2238),[0,-.275,0]));
+const legR=new T.Group();legR.position.set(.18,.55,0);body.add(legR);legR.add(mesh(new T.BoxGeometry(.2,.55,.2),HM(0x1e2238),[0,-.275,0]));
 const capeGeo=new T.PlaneGeometry(.95,1.5,2,6);capeGeo.translate(0,-.75,0);const cape=mesh(capeGeo,HM(0xc01c2c,{side:T.DoubleSide,roughness:.7,emissive:0x300408}),[0,1.75,.36]);cape.rotation.x=.18;body.add(cape);const capeBase=capeGeo.attributes.position.array.slice();
 body.add(mesh(new T.BoxGeometry(.62,.5,.2),HM(0xc8d0e0,{metalness:.8,roughness:.3}),[0,1.3,-.28]));
 body.add(mesh(new T.BoxGeometry(.8,.12,.62),HM(0x5a3a1a),[0,.65,0]));body.add(mesh(new T.BoxGeometry(.18,.14,.08),HM(0xe8c56a,{metalness:.8}),[0,.65,-.32]));
-body.add(mesh(new T.CylinderGeometry(.34,.36,.22,10,1,true),HM(0xc8d0e0,{metalness:.8,roughness:.3,side:T.DoubleSide}),[0,2.08,0]));
-body.add(mesh(new T.BoxGeometry(.06,.3,.06),HM(0xe8c56a,{metalness:.8}),[0,2.3,-.05]));
-const swordP=new T.Group();swordP.position.set(.5,1.1,0);body.add(swordP);
+const swordP=new T.Group();swordP.position.set(.08,-.4,.05);armR.add(swordP);
 const blade=new T.Mesh(new T.BoxGeometry(.09,1.5,.03),B(0x9fe6ff));blade.position.y=.85;swordP.add(blade);
 swordP.add(mesh(new T.BoxGeometry(.35,.06,.1),M(0xe8c56a),[0,.1,0]));
 const sl=new T.PointLight(0x4ab8ff,6,6);sl.position.y=.8;swordP.add(sl);swordP.rotation.z=-.5;
@@ -82132,6 +82137,10 @@ function pushOut(p,r){for(const o of obs){const dx=p.x-o.x,dz=p.z-o.z,d=Math.hyp
 function killMob(e){if(e.dead)return;e.dead=true;e.die=0;const mc=MOBCOL[e.type]||0xffd080;burst(e.obj.position.clone().setY(1),mc,22,5,5);
  if(!G.boss||!G.boss.dead){shock(e.obj.position,mc,.3,2.6,.5,.9);sparks(e.obj.position.clone().setY(.9),mc,8,.8,2.5,-.25,.9,.35);impact(e.obj.position.clone().setY(1.1),mc,2.8)}}
 const MOBCOL={slime:0x60ff60,spitter1:0xc060ff,bat:0xb070ff,sonicbat:0x60e0ff,wolf:0xc0c8d8,shaman:0x90e0ff,scorpion:0xffa040,sandmage:0xffc060,frog:0x80ff40,spitter:0xc060ff,imp:0xff6010,golemling:0xff8020,skeleton:0xe8e0d0,archer:0x60ffd0,orc:0x80c040};
+// pass17: visual-only hit flash (clone mats once per entity; restore emissive after)
+function prepFlash(e){if(e._fm)return;e._fm=[];e.obj.traverse(o=>{if(!o.isMesh||!o.material)return;const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms){if(!m||!m.emissive)continue;if(!m.userData._p17){m.userData._p17=1;/* mark owned */}e._fm.push({m,r:m.emissive.r,g:m.emissive.g,b:m.emissive.b,ei:m.emissiveIntensity||1})}})}
+function applyFlash(e,amt){if(!e._fm)prepFlash(e);const a=Math.max(0,amt);for(const x of e._fm){x.m.emissive.setRGB(x.r+a*(1-x.r),x.g+a*(.15-x.g),x.b+a*(.1-x.b));if('emissiveIntensity' in x.m)x.m.emissiveIntensity=x.ei+a*2.2}}
+function clearFlash(e){if(!e._fm)return;for(const x of e._fm){x.m.emissive.setRGB(x.r,x.g,x.b);if('emissiveIntensity' in x.m)x.m.emissiveIntensity=x.ei}}
 // ================= HERO ACTIONS
 let slashT=9,spinT=9,healT=9,ultT=9,dodgeT=9,dashT=9,iframe=0,hurtT=9,shake=0,comboT=9,flash=0,atkCD=0;const fwd=new T.Vector3();
 const heroFwd=()=>fwd.set(-Math.sin(hero.rotation.y),0,-Math.cos(hero.rotation.y));
@@ -82274,20 +82283,23 @@ function hud(dt){const mx=stats().maxHp;$('hp').firstElementChild.style.width=G.
 // ================= LOOP
 window.cam={yaw:0,dist:12,h:8.5,look:1.8};let last=performance.now();const tmp=new T.Vector3();
 function loop(now){requestAnimationFrame(loop);const rdt=Math.min(.1,(now-last)/1000);last=now;if(window.simming)return;step((window.freeze||G.mode=='pause')?0:rdt);R.render(S,C);if((mmT+=rdt)>.1){mmT=0;minimap()}}
-let mmT=0;window.step=step;window.setSeed=x=>seed=x;window.stats=stats;window.timers=timers;window.dbg={tele,orbs,get mobs(){return mobs},spawnMob};Object.defineProperty(window,'mobs',{get(){return mobs},configurable:true});window.spawnMob=spawnMob;window.dodgeDirSet=(x,z)=>{jv.x=x;jv.y=z;dodge()};window.moveVecSet=(x,z)=>{jv.x=x;jv.y=z};
+let mmT=0;window.step=step;window.setSeed=x=>seed=x;window.stats=stats;window.timers=timers;window.dbg={tele,orbs,get mobs(){return mobs},spawnMob};window.trigHurt=n=>{const g=window.god;window.god=false;iframe=0;hurt(n||80);window.god=g};Object.defineProperty(window,'mobs',{get(){return mobs},configurable:true});window.spawnMob=spawnMob;window.dodgeDirSet=(x,z)=>{jv.x=x;jv.y=z;dodge()};window.moveVecSet=(x,z)=>{jv.x=x;jv.y=z};
 function step(dt){G.time+=dt;const t=G.time;
  for(let i=timers.length-1;i>=0;i--)if(G.time>=timers[i].t){const f=timers[i].f;timers.splice(i,1);f()}
  if(G.mode=='play'&&!G.over){const mv=moveVec();
-  if(dodgeT<.35){hero.position.addScaledVector(dodgeDir,dt*16);body.rotation.x=-dodgeT/.35*Math.PI*2;hero.rotation.y=Math.atan2(-dodgeDir.x,-dodgeDir.z)}
-  else if(dashT<.2){hero.position.addScaledVector(heroFwd(),dt*40)}
-  else{body.rotation.x=0;if(mv.lengthSq()>.01){hero.position.addScaledVector(mv,dt*6);if(slashT>.3)hero.rotation.y=Math.atan2(-mv.x,-mv.z);body.position.y=Math.abs(Math.sin(t*12))*.08}}
+  if(dodgeT<.35){hero.position.addScaledVector(dodgeDir,dt*16);body.rotation.x=-dodgeT/.35*Math.PI*2;hero.rotation.y=Math.atan2(-dodgeDir.x,-dodgeDir.z);legL.rotation.x=legR.rotation.x=armL.rotation.x=0}
+  else if(dashT<.2){hero.position.addScaledVector(heroFwd(),dt*40);/* stretch pose applied below */}
+  else{body.rotation.x=0;if(mv.lengthSq()>.01){hero.position.addScaledVector(mv,dt*6);if(slashT>.3)hero.rotation.y=Math.atan2(-mv.x,-mv.z);body.position.y=Math.abs(Math.sin(t*12))*.08}else body.position.y=0}
   hero.position.clampLength(0,ARENA-1);pushOut(hero.position,.5);if(atkHold)attack();
   G.mp=Math.min(MP_MAX,G.mp+dt*12);skills.forEach(s=>s.t=Math.max(0,s.t-dt))}
- if(G.mode=='menu'){hero.rotation.y=t*.4;body.rotation.x=0}
+ if(G.mode=='menu'){hero.rotation.y=t*.4;body.rotation.x=0;body.position.y=0}
  dodgeT+=dt;dashT+=dt;iframe-=dt;hurtT+=dt;slashT+=dt;spinT+=dt;healT+=dt;ultT+=dt;atkCD-=dt;
  {const sp=Math.min(1.5,slashT/.2),so=slashT<.34?1-Math.max(0,(slashT-.15)/.19):0;slashG.visible=so>0;if(so>0){slash.material.uniforms.prog.value=sp;slash.material.uniforms.op.value=so;slash2.material.uniforms.prog.value=Math.max(0,sp-.1);slash2.material.uniforms.op.value=so*.55}
-  swordP.rotation.x=slashT<.28?-1.5+Math.min(1,slashT/.28)*3:-.3;if(slashT<.16&&dt>0&&G.mode=='play')sparks(tipW,0xaee8ff,2,1.6,1.2,.6,.35)}
- {const so=spinT<.5?1-spinT/.5:0;spin.visible=spinGround.visible=so>0;if(so>0){spin.material.uniforms.op.value=Math.min(.75,so*1.1);spinGround.material.uniforms.op.value=so*.5;spin.rotation.z=spinT*20;spin.scale.setScalar(.7+spinT*1.1);spinGround.rotation.z=spinT*13;spinGround.scale.setScalar(.75+spinT*1.3)}body.rotation.y=spinT<.5?spinT*25:0}
+  /* pass17: attack wind-up → slash → follow-through (synced to existing VFX window) */
+  if(slashT<.28){const k=slashT/.28;const ease=k<.22?-(.22-k)/.22*.55:Math.min(1,(k-.22)/.55)*2.9-.55;swordP.rotation.x=-.3+ease;armR.rotation.z=k<.25?k/.25*.4:(1-(k-.25)/.75)*.15;armR.rotation.y=k<.3?-k/.3*.35:-(1-(k-.3)/.7)*.1;body.rotation.y=spinT>=.5?(k<.2?-k/.2*.25:Math.sin((k-.2)/.8*Math.PI)*.35):body.rotation.y}
+  else{swordP.rotation.x=-.3;if(spinT>=.5&&slashT>.35){armR.rotation.z=armR.rotation.y=0}}
+  if(slashT<.16&&dt>0&&G.mode=='play')sparks(tipW,0xaee8ff,2,1.6,1.2,.6,.35)}
+ {const so=spinT<.5?1-spinT/.5:0;spin.visible=spinGround.visible=so>0;if(so>0){spin.material.uniforms.op.value=Math.min(.75,so*1.1);spinGround.material.uniforms.op.value=so*.5;spin.rotation.z=spinT*20;spin.scale.setScalar(.7+spinT*1.1);spinGround.rotation.z=spinT*13;spinGround.scale.setScalar(.75+spinT*1.3)}if(spinT<.5)body.rotation.y=spinT*25;else if(slashT>=.28)body.rotation.y=0}
  {const bo=dashT<.38?(dashT<.22?1:1-(dashT-.22)/.16):0;bolt.visible=streak.visible=bo>0;if(bo>0){if(dashT<.22)dashTo.copy(hero.position);buildBolt(dashFrom,dashTo);boltMat.opacity=bo;
    const dx=dashTo.x-dashFrom.x,dz=dashTo.z-dashFrom.z,l=Math.hypot(dx,dz);streak.position.set((dashTo.x+dashFrom.x)/2,.07,(dashTo.z+dashFrom.z)/2);streak.rotation.y=Math.atan2(dx,dz);streak.scale.set(1.1,1,Math.max(.6,l+1.2));streak.material.opacity=bo*.7;
    if(dashT<.2&&dt>0)sparks(hero.position.clone().setY(1),0xfff0a0,3,2,1.5,.5,.35,.3)}
@@ -82299,15 +82311,27 @@ function step(dt){G.time+=dt;const t=G.time;
   const rn=ultT<1.6?Math.min(1,ultT/.12)*(1-Math.max(0,(ultT-.6)/1)):0;ultRune.visible=rn>0;if(rn>0){ultRune.material.opacity=rn*.9;ultRune.scale.setScalar(4+12*(1-Math.pow(1-Math.min(1,ultT/.3),3)));ultRune.rotation.y=-ultT*1.1}
   const po=ultT<.7?Math.sin(Math.min(1,ultT/.7)*Math.PI):0;ultPillar.visible=po>0;if(po>0){ultPillar.material.uniforms.op.value=po*.45;ultPillar.material.uniforms.t.value=t;const w=1+ultT*.6;ultPillar.scale.set(w,1,w)}
   if(ultT>=.25&&!ultBoom){ultBoom=1;const up=ultFx.position;shock(up,0xffe0a0,.8,12,.55,.7);shock(up,0xff9a30,1,10,.9,.7);sparks(up.clone().setY(1),0xffc040,70,15,5,.5,.8,1);sparks(up.clone().setY(.4),0xfff0c0,26,6,8,.3,1,2);impact(up.clone().setY(1.8),0xffd080,7)}}
- {const mvg=moveVec().lengthSq()>.01;const ca=capeGeo.attributes.position;for(let i=0;i<ca.count;i++){const y=capeBase[i*3+1],x=capeBase[i*3];const w=-y/1.5;ca.setZ(i,capeBase[i*3+2]+w*w*(mvg?.55:.15)+Math.sin(t*(mvg?10:3)+y*4+x*2)*.06*w);}ca.needsUpdate=true;capeGeo.computeVertexNormals();
- if(!mvg)body.scale.set(1,1+Math.sin(t*2.2)*.015,1);if(mvg&&G.mode=='play'&&Math.random()<dt*14)footDust(hero.position)}
+ {const mvg=moveVec().lengthSq()>.01&&G.mode=='play'&&!G.over&&dodgeT>=.35;const dashing=dashT<.22;const swinging=slashT<.32;
+  /* cape trail (stronger when running/dashing) */
+  const ca=capeGeo.attributes.position;const capeAmp=dashing?.85:mvg?.55:.15;const capeSpd=dashing?14:mvg?10:3;
+  for(let i=0;i<ca.count;i++){const y=capeBase[i*3+1],x=capeBase[i*3];const w=-y/1.5;ca.setZ(i,capeBase[i*3+2]+w*w*capeAmp+Math.sin(t*capeSpd+y*4+x*2)*.07*w);}ca.needsUpdate=true;capeGeo.computeVertexNormals();
+  /* run cycle / idle breath / dash stretch / hit flinch — visual only */
+  if(G.mode=='menu'){const br=1+Math.sin(t*2.2)*.018;body.scale.set(1,br,1);legL.rotation.x=legR.rotation.x=armL.rotation.x=0;headG.position.y=0;armL.rotation.z=Math.sin(t*1.6)*.08}
+  else if(dashing){const k=dashT/.22;body.scale.set(1.05-k*.05,.88+k*.12,1.22-k*.18);legL.rotation.x=-.55;legR.rotation.x=.35;armL.rotation.x=.6;if(!swinging){armR.rotation.x=-.35;armR.rotation.z=.2}headG.rotation.x=.15;body.rotation.x=-.2}
+  else if(hurtT<.22){const hk=1-hurtT/.22;body.scale.set(1.08+hk*.06,.9-hk*.05,1.05);body.position.z=.12*hk;body.rotation.x=.18*hk;headG.rotation.x=-.2*hk;legL.rotation.x=legR.rotation.x=-.15*hk;armL.rotation.x=-.4*hk}
+  else if(mvg&&!swinging){const cycle=t*11;const sw=Math.sin(cycle);legL.rotation.x=sw*.7;legR.rotation.x=-sw*.7;armL.rotation.x=-sw*.55;armR.rotation.x=sw*.35;armL.rotation.z=.08;body.rotation.z=sw*.06;body.rotation.x=-.08;headG.position.y=Math.abs(Math.sin(cycle))*.04;headG.rotation.x=Math.sin(cycle*2)*.05;const br=1+Math.sin(cycle)*.02;body.scale.set(1/Math.sqrt(br),br,1/Math.sqrt(br));if(Math.random()<dt*14)footDust(hero.position)}
+  else if(!mvg&&!swinging&&!dashing){const br=1+Math.sin(t*2.2)*.018;body.scale.set(1,br,1);body.position.z=0;body.rotation.z*=.85;legL.rotation.x*=.85;legR.rotation.x*=.85;armL.rotation.x*=.85;armL.rotation.z=Math.sin(t*1.8)*.06;if(slashT>.35&&spinT>=.5)armR.rotation.x*=.85;headG.position.y=Math.sin(t*2.2)*.015;headG.rotation.x*=.9}
+  else{body.position.z=0;if(!dashing){const br=1+Math.sin(t*2.2)*.01;body.scale.set(1,br,1);if(slashT>.32)body.rotation.x=0}}
+  if(hurtT>=.22&&!dashing)body.position.z*=.8
+  if(dodgeT<.35){legL.rotation.x=legR.rotation.x=armL.rotation.x=armL.rotation.z=0;armR.rotation.x=armR.rotation.y=armR.rotation.z=0;headG.rotation.x=0;body.scale.set(1,1,1)}}
  blade.getWorldPosition(baseW);tipW.set(0,.75,0);blade.localToWorld(tipW);baseW.set(0,-.3,0);blade.localToWorld(baseW);if(trailPts.length&&trailPts[0][0].distanceTo(tipW)>2.5)trailPts.length=0;trailPts.unshift([tipW.clone(),baseW.clone()]);if(trailPts.length>TN)trailPts.pop();
  {const ta=trailGeo.attributes.position,al=trailGeo.attributes.alpha;for(let i=0;i<TN;i++){const q=trailPts[Math.min(i,trailPts.length-1)];ta.setXYZ(i*2,q[0].x,q[0].y,q[0].z);ta.setXYZ(i*2+1,q[1].x,q[1].y,q[1].z);al.setX(i*2,1-i/TN);al.setX(i*2+1,0)}ta.needsUpdate=al.needsUpdate=true;
-  trailMat.uniforms.op.value=Math.max(slashT<.35?1-slashT/.35:0,spinT<.5?1-spinT/.5:0,dashT<.3?1:0)}const hr=hurtT<.15?.8:0;heroMats.forEach(m=>m.emissive.setRGB(hr,0,0));
+  trailMat.uniforms.op.value=Math.max(slashT<.35?1-slashT/.35:0,spinT<.5?1-spinT/.5:0,dashT<.3?1:0)}const hr=hurtT<.18?.9*(1-hurtT/.18):0;heroMats.forEach(m=>m.emissive.setRGB(hr,hr*.1,hr*.05));
  // mobs
  let alive=0;for(let i=mobs.length-1;i>=0;i--){const e=mobs[i],o=e.obj;
-  if(e.dead){e.die+=dt;o.scale.set(Math.max(.01,1+e.die*2),Math.max(.01,1-e.die*3),Math.max(.01,1+e.die*2));o.position.y+=dt*1;if(e.die>.35){S.remove(o);mobs.splice(i,1)}continue}alive++;
-  if(e.spawn<1){e.spawn=Math.min(1,e.spawn+dt*2.5);o.scale.setScalar(Math.max(.01,e.spawn));continue}
+  if(e.dead){e.die+=dt;/* visual-only death: squash+sink; kill already counted */const k=Math.min(1,e.die/.4);o.scale.set(Math.max(.01,1+k*.9),Math.max(.01,1-k*1.2),Math.max(.01,1+k*.9));if(!e.fly)o.position.y=-(k*.6);else o.position.y+=dt*1.2;o.rotation.y+=dt*5;if(e.die>.4){clearFlash(e);S.remove(o);mobs.splice(i,1)}continue}alive++;
+  if(e.spawn<1){e.spawn=Math.min(1,e.spawn+dt*2.5);const k=e.spawn;o.scale.setScalar(Math.max(.01,.2+k*.8));if(!e.fly)o.position.y=(1-k)*-0.7;else o.position.y=0;continue}
+  if(!e.fly)o.position.y=0;
   const d=tmp.subVectors(hero.position,o.position).setY(0);const dist=d.length();e.moving=false;
   if(dt>0&&!G.over&&e.ranged){o.rotation.y=Math.atan2(d.x,d.z);const dn=d.clone().normalize();if(dist>9){o.position.addScaledVector(dn,dt*e.spd);e.moving=true}else if(dist<5.5){o.position.addScaledVector(dn,-dt*e.spd*.8);e.moving=true}
    e.cd-=dt;if(e.cd<=0&&dist<12){e.cd=rnd(2,2.8);e.atkAnim=.3;shootOrb(o.position.clone().setY(e.fly?1.7:1.3),dn,8,e.ranged,e.dmg)}}
@@ -82315,11 +82339,16 @@ function step(dt){G.time+=dt;const t=G.time;
    e.cd-=dt;if(dist<e.r+1.1&&e.cd<=0){e.cd=1.4;e.atkAnim=.3;hurt(e.dmg)}}
   e.atkAnim=Math.max(0,e.atkAnim-dt);if(e.kb.lengthSq()>.01){o.position.addScaledVector(e.kb,dt);e.kb.multiplyScalar(.85)}
   for(const f of mobs)if(f!==e&&!f.dead){const s=tmp.subVectors(o.position,f.obj.position).setY(0);const l=s.length();if(l<e.r+f.r-.4&&l>.01)o.position.addScaledVector(s.normalize(),dt*2)}
-  o.position.clampLength(0,ARENA-1);if(!e.fly)pushOut(o.position,e.r*.8);{const br=1+Math.sin(t*3+e.ph)*.03;o.scale.set(1/Math.sqrt(br),br,1/Math.sqrt(br))}o.anim?.(t,e);e.bar.fg.scale.x=Math.max(.001,e.hp/e.max);e.bar.fg.position.x=-(1-Math.max(0,e.hp/e.max))*e.bar.w/2;
+  o.position.clampLength(0,ARENA-1);if(!e.fly)pushOut(o.position,e.r*.8);
+  /* idle breath + hit squash/flash (restore scale exactly via formula) */
+  {const br=1+Math.sin(t*3+e.ph)*.03;let sx=1/Math.sqrt(br),sy=br,sz=1/Math.sqrt(br);
+   if(e.flash>0){e.flash=Math.max(0,e.flash-dt);const fk=e.flash/.12;sx*=1+.18*fk;sy*=1-.22*fk;sz*=1+.18*fk;applyFlash(e,fk*.95)}else if(e._fm)clearFlash(e);
+   o.scale.set(sx,sy,sz)}
+  o.anim?.(t,e);e.bar.fg.scale.x=Math.max(.001,e.hp/e.max);e.bar.fg.position.x=-(1-Math.max(0,e.hp/e.max))*e.bar.w/2;
   e.bar.quaternion.copy(o.quaternion).invert().multiply(C.quaternion)}
  if(G.mode=='play'&&!G.over&&!G.boss&&alive==0&&G.wave>0&&!G.waiting){G.waiting=1;later(.9,()=>{G.waiting=0;nextWave()})}
- const b=G.boss;if(b){if(dt>0)bossUpdate(b,dt);b.obj.anim?.(t,b);if(b.dead){b.die+=dt;b.obj.scale.setScalar(Math.max(.01,1-b.die*.6));b.obj.rotation.y+=dt*6}
-  const ms=b.obj.getObjectByProperty('isMesh',true);flash=Math.max(0,flash-dt)}
+ const b=G.boss;if(b){if(dt>0)bossUpdate(b,dt);b.obj.anim?.(t,b);if(b.dead){b.die+=dt;const k=Math.min(1,b.die/1.2);b.obj.scale.setScalar(Math.max(.01,(1-k)*.95+.05));b.obj.rotation.y+=dt*6;b.obj.position.y=-k*1.2}
+  else if(flash>0){flash=Math.max(0,flash-dt);prepFlash(b);applyFlash(b,(flash/.12)*.9)}else if(b._fm)clearFlash(b);else flash=Math.max(0,flash-dt)}
  if(dt>0){updTele(dt);updOrbs(dt)}
  if(particles){const pe=particles.geometry.attributes.position,md=particles.mode;for(let i=0;i<pe.count;i++){let y=pe.getY(i);
   if(md=='snow'){y-=dt*1.2;pe.setX(i,pe.getX(i)+Math.sin(t+i)*dt*.3);if(y<0)y=10}else if(md=='rise'){y+=dt*.6;if(y>10)y=0}else{y+=Math.sin(t*1.5+i)*dt*.2}pe.setY(i,y)}pe.needsUpdate=true}
