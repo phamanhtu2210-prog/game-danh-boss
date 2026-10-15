@@ -81596,23 +81596,79 @@ function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geome
 // ================= HERO
 const hero=new T.Group();S.add(hero);const body=new T.Group();hero.add(body);
 const heroMats=[];const HM=(c,o)=>{const m=M(c,o);heroMats.push(m);return m};
-// pass17: limb groups for run/attack/dash/flinch (visual only)
-const torso=mesh(new T.CylinderGeometry(.35,.45,1.1,8),HM(0x2b4fa0,{metalness:.4,roughness:.5}),[0,1.05,0]);body.add(torso);
+// pass21: stylized action-RPG swordsman (Khang) — keep limb/cape/sword/heroMats names for pass17 anim + pass16 VFX
+const mArmor=HM(0x2b4fa0,{metalness:.48,roughness:.42}),mArmorDk=HM(0x1a326a,{metalness:.55,roughness:.38}),mTrim=HM(0xc8d0e0,{metalness:.88,roughness:.26}),mGold=HM(0xe8c56a,{metalness:.9,roughness:.28}),mSkin=HM(0xf1c6a0,{roughness:.72}),mHair=HM(0x2a1a12,{roughness:.88}),mLeather=HM(0x5a3a1a,{roughness:.9}),mBoot=HM(0x1a1e30,{metalness:.25,roughness:.65}),mCape=HM(0xc01c2c,{side:T.DoubleSide,roughness:.68,emissive:0x300408}),mPauldron=HM(0xd8b060,{metalness:.7,roughness:.32}),mCloth=HM(0x243056,{roughness:.8});
+const torso=mesh(new T.CylinderGeometry(.33,.42,1.05,8),mArmor,[0,1.08,0]);body.add(torso);
+body.add(mesh(new T.CylinderGeometry(.36,.3,.28,8),mArmorDk,[0,1.52,0]));// upper chest
+body.add(mesh(new T.BoxGeometry(.58,.58,.2),mArmorDk,[0,1.18,-.24]));// chest plate
+body.add(mesh(new T.BoxGeometry(.5,.07,.22),mTrim,[0,1.42,-.26]));// plate top trim
+body.add(mesh(new T.BoxGeometry(.5,.06,.22),mTrim,[0,.94,-.26]));// plate bottom trim
+body.add(mesh(new T.BoxGeometry(.09,.42,.22),mGold,[0,1.18,-.28]));// center ridge
+body.add(mesh(new T.BoxGeometry(.16,.16,.06),mGold,[0,1.28,-.34]));// chest gem plate
+body.add(mesh(new T.OctahedronGeometry(.055,0),B(0x4ab8ff),[0,1.28,-.38],false));// gem glow
+body.add(mesh(new T.BoxGeometry(.55,.5,.16),mTrim,[0,1.22,.3]));// back plate
+body.add(mesh(new T.SphereGeometry(.24,7,6),mPauldron,[-.5,1.55,.02]));body.add(mesh(new T.SphereGeometry(.24,7,6),mPauldron,[.5,1.55,.02]));
+body.add(mesh(new T.BoxGeometry(.32,.14,.3),mTrim,[-.52,1.64,0]));body.add(mesh(new T.BoxGeometry(.32,.14,.3),mTrim,[.52,1.64,0]));
+body.add(mesh(new T.BoxGeometry(.18,.2,.12),mGold,[-.58,1.5,-.12]));body.add(mesh(new T.BoxGeometry(.18,.2,.12),mGold,[.58,1.5,-.12]));// pauldron spikes
+body.add(mesh(new T.BoxGeometry(.88,.13,.6),mLeather,[0,.6,0]));// belt
+body.add(mesh(new T.BoxGeometry(.22,.18,.1),mGold,[0,.6,-.32]));// buckle
+body.add(mesh(new T.BoxGeometry(.08,.08,.06),mTrim,[0,.6,-.37]));// buckle jewel
+body.add(mesh(new T.BoxGeometry(.14,.2,.08),mLeather,[-.28,.48,-.05]));body.add(mesh(new T.BoxGeometry(.14,.2,.08),mLeather,[.28,.48,-.05]));// belt pouches
 const headG=new T.Group();headG.position.set(0,1.9,0);body.add(headG);
-headG.add(mesh(new T.SphereGeometry(.32,10,8),HM(0xf1c6a0),[0,0,0]));
-headG.add(mesh(new T.ConeGeometry(.36,.35,8),HM(0x2a1a12),[0,.22,0]));
-headG.add(mesh(new T.CylinderGeometry(.34,.36,.22,10,1,true),HM(0xc8d0e0,{metalness:.8,roughness:.3,side:T.DoubleSide}),[0,.18,0]));
-headG.add(mesh(new T.BoxGeometry(.06,.3,.06),HM(0xe8c56a,{metalness:.8}),[0,.4,-.05]));
-const armL=new T.Group();armL.position.set(-.42,1.5,0);body.add(armL);armL.add(mesh(new T.SphereGeometry(.2,8,6),HM(0xd8b060,{metalness:.6,roughness:.4}),[0,0,0]));
-const armR=new T.Group();armR.position.set(.42,1.5,0);body.add(armR);armR.add(mesh(new T.SphereGeometry(.2,8,6),HM(0xd8b060,{metalness:.6,roughness:.4}),[0,0,0]));
-const legL=new T.Group();legL.position.set(-.18,.55,0);body.add(legL);legL.add(mesh(new T.BoxGeometry(.2,.55,.2),HM(0x1e2238),[0,-.275,0]));
-const legR=new T.Group();legR.position.set(.18,.55,0);body.add(legR);legR.add(mesh(new T.BoxGeometry(.2,.55,.2),HM(0x1e2238),[0,-.275,0]));
-const capeGeo=new T.PlaneGeometry(.95,1.5,2,6);capeGeo.translate(0,-.75,0);const cape=mesh(capeGeo,HM(0xc01c2c,{side:T.DoubleSide,roughness:.7,emissive:0x300408}),[0,1.75,.36]);cape.rotation.x=.18;body.add(cape);const capeBase=capeGeo.attributes.position.array.slice();
-body.add(mesh(new T.BoxGeometry(.62,.5,.2),HM(0xc8d0e0,{metalness:.8,roughness:.3}),[0,1.3,-.28]));
-body.add(mesh(new T.BoxGeometry(.8,.12,.62),HM(0x5a3a1a),[0,.65,0]));body.add(mesh(new T.BoxGeometry(.18,.14,.08),HM(0xe8c56a,{metalness:.8}),[0,.65,-.32]));
+headG.add(mesh(new T.SphereGeometry(.3,10,8),mSkin,[0,0,0]));
+headG.add(mesh(new T.SphereGeometry(.32,8,6),mHair,[0,.14,.1]));// hair volume toward back (+Z)
+headG.add(mesh(new T.SphereGeometry(.18,6,5),mHair,[0,.22,.02]));// top hair
+headG.add(mesh(new T.BoxGeometry(.12,.26,.14),mHair,[-.27,-.02,.08]));headG.add(mesh(new T.BoxGeometry(.12,.26,.14),mHair,[.27,-.02,.08]));// side locks
+headG.add(mesh(new T.BoxGeometry(.36,.14,.18),mHair,[0,.02,.2]));// nape hair
+headG.add(mesh(new T.BoxGeometry(.34,.08,.1),mHair,[0,.16,-.16]));// bangs fringe
+headG.add(mesh(new T.CylinderGeometry(.3,.32,.1,10,1,true),mTrim,[0,.08,-.02]));// headband
+headG.add(mesh(new T.BoxGeometry(.12,.07,.05),mGold,[0,.1,-.3]));// headband gem mount
+headG.add(mesh(new T.OctahedronGeometry(.045,0),B(0x60e8ff),[0,.1,-.34],false));
+headG.add(mesh(new T.SphereGeometry(.048,5,4),B(0x70f0ff),[-.1,.02,-.275],false));// eyes glow
+headG.add(mesh(new T.SphereGeometry(.048,5,4),B(0x70f0ff),[.1,.02,-.275],false));
+headG.add(mesh(new T.SphereGeometry(.02,4,3),B(0x103050),[-.1,.02,-.31],false));// pupils
+headG.add(mesh(new T.SphereGeometry(.02,4,3),B(0x103050),[.1,.02,-.31],false));
+headG.add(mesh(new T.BoxGeometry(.09,.02,.04),mHair,[-.1,.09,-.26]));headG.add(mesh(new T.BoxGeometry(.09,.02,.04),mHair,[.1,.09,-.26]));// brows
+headG.add(mesh(new T.BoxGeometry(.055,.035,.05),mSkin,[0,-.02,-.29]));// nose hint
+const armL=new T.Group();armL.position.set(-.42,1.5,0);body.add(armL);
+armL.add(mesh(new T.SphereGeometry(.17,7,5),mPauldron,[0,0,0]));
+armL.add(mesh(new T.CylinderGeometry(.1,.13,.34,6),mArmor,[0,-.18,0]));
+armL.add(mesh(new T.SphereGeometry(.1,5,4),mTrim,[0,-.36,0]));// elbow
+armL.add(mesh(new T.CylinderGeometry(.09,.11,.28,6),mArmorDk,[0,-.5,0]));
+armL.add(mesh(new T.BoxGeometry(.2,.15,.2),mTrim,[0,-.64,0]));// gauntlet
+armL.add(mesh(new T.BoxGeometry(.16,.1,.16),mGold,[0,-.72,0]));// fist plate
+const armR=new T.Group();armR.position.set(.42,1.5,0);body.add(armR);
+armR.add(mesh(new T.SphereGeometry(.17,7,5),mPauldron,[0,0,0]));
+armR.add(mesh(new T.CylinderGeometry(.1,.13,.34,6),mArmor,[0,-.18,0]));
+armR.add(mesh(new T.SphereGeometry(.1,5,4),mTrim,[0,-.36,0]));
+armR.add(mesh(new T.CylinderGeometry(.09,.11,.22,6),mArmorDk,[0,-.48,0]));
+armR.add(mesh(new T.BoxGeometry(.2,.14,.2),mTrim,[0,-.58,0]));// gauntlet near sword grip
+const legL=new T.Group();legL.position.set(-.18,.55,0);body.add(legL);
+legL.add(mesh(new T.BoxGeometry(.24,.3,.24),mCloth,[0,-.12,0]));// thigh
+legL.add(mesh(new T.BoxGeometry(.22,.26,.22),mBoot,[0,-.38,0]));// greave
+legL.add(mesh(new T.BoxGeometry(.2,.08,.2),mTrim,[0,-.28,0]));// knee plate
+legL.add(mesh(new T.BoxGeometry(.26,.1,.32),mBoot,[0,-.52,.04]));// boot
+legL.add(mesh(new T.BoxGeometry(.28,.06,.18),mGold,[0,-.48,-.1]));// boot trim
+const legR=new T.Group();legR.position.set(.18,.55,0);body.add(legR);
+legR.add(mesh(new T.BoxGeometry(.24,.3,.24),mCloth,[0,-.12,0]));
+legR.add(mesh(new T.BoxGeometry(.22,.26,.22),mBoot,[0,-.38,0]));
+legR.add(mesh(new T.BoxGeometry(.2,.08,.2),mTrim,[0,-.28,0]));
+legR.add(mesh(new T.BoxGeometry(.26,.1,.32),mBoot,[0,-.52,.04]));
+legR.add(mesh(new T.BoxGeometry(.28,.06,.18),mGold,[0,-.48,-.1]));
+const capeGeo=new T.PlaneGeometry(1.12,1.5,5,12);capeGeo.translate(0,-.75,0);const cape=mesh(capeGeo,mCape,[0,1.78,.42]);cape.rotation.x=.16;body.add(cape);const capeBase=capeGeo.attributes.position.array.slice();
+body.add(mesh(new T.CylinderGeometry(.4,.46,.2,10,1,true),HM(0xa01828,{side:T.DoubleSide,roughness:.7}),[0,1.72,.08]));// cape collar
+body.add(mesh(new T.BoxGeometry(.5,.28,.08),mCape,[0,1.55,.38]));// cape yoke
 const swordP=new T.Group();swordP.position.set(.08,-.4,.05);armR.add(swordP);
-const blade=new T.Mesh(new T.BoxGeometry(.09,1.5,.03),B(0x9fe6ff));blade.position.y=.85;swordP.add(blade);
-swordP.add(mesh(new T.BoxGeometry(.35,.06,.1),M(0xe8c56a),[0,.1,0]));
+const blade=new T.Mesh(new T.BoxGeometry(.085,1.48,.028),B(0xb8f0ff));blade.position.y=.85;swordP.add(blade);// keep `blade` for trail tip/base
+swordP.add(mesh(new T.BoxGeometry(.035,1.38,.03),M(0x6a90b8,{metalness:.75,roughness:.32}),[0,.85,0],false));// fuller ridge
+swordP.add(mesh(new T.BoxGeometry(.12,1.42,.012),B(0x4ab8ff,{transparent:true,opacity:.55,blending:T.AdditiveBlending,depthWrite:false}),[0,.85,.02],false));// emissive edge glow
+swordP.add(mesh(new T.BoxGeometry(.12,1.42,.012),B(0x4ab8ff,{transparent:true,opacity:.45,blending:T.AdditiveBlending,depthWrite:false}),[0,.85,-.02],false));
+swordP.add(mesh(new T.BoxGeometry(.46,.08,.11),mGold,[0,.12,0]));// crossguard
+swordP.add(mesh(new T.BoxGeometry(.1,.1,.14),mTrim,[0,.08,0]));
+swordP.add(mesh(new T.BoxGeometry(.06,.06,.16),mGold,[-.2,.12,0]));swordP.add(mesh(new T.BoxGeometry(.06,.06,.16),mGold,[.2,.12,0]));// guard tips
+swordP.add(mesh(new T.CylinderGeometry(.038,.045,.3,6),mLeather,[0,-.06,0]));// grip
+swordP.add(mesh(new T.SphereGeometry(.075,6,5),mGold,[0,-.24,0]));// pommel
+swordP.add(mesh(new T.OctahedronGeometry(.04,0),B(0x60e8ff),[0,-.24,0],false));
 const sl=new T.PointLight(0x4ab8ff,6,6);sl.position.y=.8;swordP.add(sl);swordP.rotation.z=-.5;
 const TN=12,trailGeo=new T.BufferGeometry();trailGeo.setAttribute('position',new T.BufferAttribute(new Float32Array(TN*2*3),3));trailGeo.setAttribute('alpha',new T.BufferAttribute(new Float32Array(TN*2),1));
 {const idx=[];for(let i=0;i<TN-1;i++){const a=i*2;idx.push(a,a+1,a+2,a+1,a+3,a+2)}trailGeo.setIndex(idx)}
