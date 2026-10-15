@@ -80729,13 +80729,67 @@ const MODELS={
    drips.forEach((q,i)=>{const k=(t*.7+q.o)%1;if(k<q.pk){fists[i%2].getWorldPosition(v);b.worldToLocal(v);q.d.position.copy(v);q.oy=v.y-.35}q.pk=k;const y=q.oy-k*k*2.2;q.d.position.y=y;q.d.visible=y>.05});
    const pa=aG.attributes.position;for(let i=0;i<NA;i++){const[a,r,o,s]=as[i];const k=(t*.22*s+o/6)%1,aa=a+t*.5+k*1.5;pa.setXYZ(i,Math.cos(aa)*r*(1-k*.3),.3+k*7.5,Math.sin(aa)*r*(1-k*.3)+.3)}pa.needsUpdate=true;
    fl.intensity=12+p*5*fla+Math.sin(t*13)*.8};return g},
- lich(){const g=new T.Group();const rm=M(0x1a1a2a),bm=M(0xe8e0d0);const b=new T.Group();b.scale.setScalar(2.2);g.add(b);
-  b.add(mesh(new T.ConeGeometry(.8,2.2,8,1,true),M(0x2a2a40,{side:T.DoubleSide}),[0,1.1,0]));b.add(mesh(new T.BoxGeometry(.4,.45,.4),bm,[0,2.4,0]));eyes(b,0x60ffd0,2.42,.21,.1,.06);
-  b.add(mesh(new T.ConeGeometry(.45,.6,8,1,true),rm,[0,2.55,-.05],false));const cr=M(0x60ffd0,{emissive:0x20a080});for(let k=0;k<5;k++)b.add(mesh(new T.ConeGeometry(.04,.25,4),cr,[-.16+k*.08,2.75,0],false));
-  const st=new T.Group();st.position.set(.7,1.4,.2);b.add(st);st.add(mesh(new T.CylinderGeometry(.04,.04,2.4,5),M(0x3a3040),[0,0,0],false));const sk=mesh(new T.OctahedronGeometry(.18,0),B(0x60ffd0),[0,1.3,0],false);st.add(sk);
-  const ll=new T.PointLight(0x60ffd0,15,9,1.5);ll.position.set(0,4,1.5);g.add(ll);
-  const NA=100,ap=new Float32Array(NA*3),as=[];for(let i=0;i<NA;i++)as.push([rnd(0,6.3),rnd(.6,2),rnd(0,6)]);const au=new T.Points(new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(ap,3)),new T.PointsMaterial({map:dot,color:0x60ffd0,size:.45,blending:T.AdditiveBlending,transparent:true,depthWrite:false}));g.add(au);
-  g.anim=(t,e)=>{b.position.y=.4+Math.sin(t*1.8)*.2;sk.rotation.y=t*3;const pa=au.geometry.attributes.position;for(let i=0;i<NA;i++){const[a,r,o]=as[i];const y=(t*.7+o)%4;pa.setXYZ(i,Math.cos(a+t*.6)*r,y*1.5,Math.sin(a+t*.6)*r)}pa.needsUpdate=true};return g},
+ lich(){const g=new T.Group();const b=new T.Group();b.scale.setScalar(2.2);g.add(b);for(let k=0;k<300;k++)rnd(0,1);// giữ RNG gameplay (cũ: 100 hạt × 3 rnd)
+  let ls=6060;const lr=(a,c)=>a+((ls=ls*16807%2147483647)/2147483647)*(c-a);
+  const robe=M(0x1a1a2e,{roughness:.9,emissive:0x080812,side:T.DoubleSide}),robe2=M(0x0e0e18,{roughness:.95,emissive:0x04040a,side:T.DoubleSide,transparent:true,opacity:.92}),
+   bone=M(0xe8e0d0,{roughness:.55,emissive:0x1a1810}),bone2=M(0xc8c0b0,{roughness:.65,emissive:0x12100c}),dark=M(0x2a2a40,{roughness:.8,emissive:0x0a0a18}),
+   cyan=B(0x60ffd0),cyanG=B(0x60ffd0,{transparent:true,opacity:.4,blending:T.AdditiveBlending,depthWrite:false}),gem=B(0x40ffe8),staffM=M(0x3a3048,{roughness:.7,emissive:0x100818});
+  // lớp áo choàng rách nhiều tầng
+  const body=mesh(new T.ConeGeometry(.85,2.4,8,1,true),robe,[0,1.15,0]);b.add(body);
+  const under=mesh(new T.ConeGeometry(.72,2.1,8,1,true),robe2,[0,1.05,0],false);b.add(under);
+  const hood=mesh(new T.ConeGeometry(.55,.7,8,1,true),robe,[0,2.58,-.08],false);b.add(hood);
+  // vạt áo rách (instanced)
+  {const NG=8,im=new T.InstancedMesh(new T.ConeGeometry(.12,.55,3),robe2,NG),d=new T.Object3D();
+   for(let i=0;i<NG;i++){const a=i/NG*Math.PI*2+lr(0,.4);d.position.set(Math.cos(a)*.7,.25,Math.sin(a)*.55);d.rotation.set(lr(.8,1.4),a,lr(-.3,.3));d.scale.set(lr(.7,1.2),lr(.8,1.4),1);d.updateMatrix();im.setMatrixAt(i,d.matrix)}b.add(im)}
+  // lồng ngực xương
+  const ribs=new T.Group();ribs.position.set(0,1.55,.28);b.add(ribs);
+  for(let i=0;i<5;i++){const y=.35-i*.14,w=.28+i*.04;ribs.add(mesh(new T.TorusGeometry(w,.025,3,10,Math.PI),bone2,[0,y,0],false));}
+  ribs.add(mesh(new T.BoxGeometry(.06,.55,.04),bone,[0,.05,.02],false));
+  const heart=mesh(new T.OctahedronGeometry(.1,0),cyan,[0,.12,.12],false);ribs.add(heart);
+  ribs.add(mesh(new T.SphereGeometry(.18,8,6),cyanG,[0,.12,.12],false));
+  // đầu lâu + hốc mắt cyan
+  const hd=new T.Group();hd.position.set(0,2.42,0);b.add(hd);
+  hd.add(mesh(new T.BoxGeometry(.42,.44,.4),bone,[0,0,0]));
+  hd.add(mesh(new T.BoxGeometry(.36,.16,.22),bone2,[0,-.18,.12],false));// hàm
+  const egs=[];for(const s of[-1,1]){hd.add(mesh(new T.SphereGeometry(.08,8,6),B(0x0a1018),[s*.12,.06,.2],false));
+   hd.add(mesh(new T.SphereGeometry(.055,7,5),cyan,[s*.12,.06,.22],false));
+   const h=mesh(new T.SphereGeometry(.1,8,6),cyanG,[s*.12,.06,.24],false);hd.add(h);egs.push(h)}
+  // răng
+  for(let i=0;i<4;i++)hd.add(mesh(new T.ConeGeometry(.02,.07,3),bone,[-.1+i*.07,-.22,.28],false));
+  // vương miện xương + ngọc hồn
+  const cr=new T.Group();cr.position.set(0,.28,0);hd.add(cr);
+  cr.add(mesh(new T.CylinderGeometry(.22,.26,.08,8,1,true),M(0xd0c8b8,{roughness:.5,emissive:0x181410,side:T.DoubleSide}),[0,0,0]));
+  const gems=[];for(let i=0;i<5;i++){const a=(i-2)*.4;const sp=mesh(new T.ConeGeometry(.045,i==2?.38:.24,4),bone,[Math.sin(a)*.2,.08+(i==2?.08:0),Math.cos(a)*.1],false);sp.rotation.z=-a*.5;cr.add(sp);
+   const gm=mesh(new T.OctahedronGeometry(i==2?.05:.035,0),gem,[Math.sin(a)*.2,.2+(i==2?.12:0),Math.cos(a)*.1],false);cr.add(gm);gems.push(gm)}
+  // tay xương
+  const arms=[];for(const s of[-1,1]){const a=new T.Group();a.position.set(s*.55,1.9,.05);b.add(a);
+   a.add(mesh(new T.CylinderGeometry(.05,.06,.55,5),bone,[0,-.2,0],false));
+   a.add(mesh(new T.SphereGeometry(.07,6,4),bone2,[0,-.5,0],false));
+   a.add(mesh(new T.CylinderGeometry(.04,.05,.4,4),bone,[0,-.72,0],false));
+   for(let f=0;f<3;f++){const fg=mesh(new T.ConeGeometry(.02,.12,3),bone,[s*(.04+f*.03),-.95,.02+f*.02],false);fg.rotation.z=s*(.3+f*.15);a.add(fg)}
+   arms.push(a)}
+  // gậy phép + quả cầu hồn
+  const st=new T.Group();st.position.set(.72,1.35,.25);b.add(st);
+  st.add(mesh(new T.CylinderGeometry(.035,.045,2.5,5),staffM,[0,.1,0],false));
+  st.add(mesh(new T.TorusGeometry(.12,.025,4,8),bone,[0,1.25,0],false));
+  const sk=mesh(new T.OctahedronGeometry(.16,0),cyan,[0,1.35,0],false);st.add(sk);
+  const skG=mesh(new T.SphereGeometry(.28,10,8),cyanG,[0,1.35,0],false);st.add(skG);
+  st.add(mesh(new T.OctahedronGeometry(.06,0),gem,[0,1.55,0],false));
+  // hồn bay quanh (wisps)
+  const NW=5,wisps=[],wG=new T.SphereGeometry(.07,6,4);for(let i=0;i<NW;i++){const w=mesh(wG,cyanG,[0,0,0],false);w.add(mesh(new T.SphereGeometry(.03,5,4),cyan,[0,0,0],false));b.add(w);wisps.push({m:w,a:lr(0,6.3),r:lr(.9,1.5),o:lr(0,6),h:lr(1.2,2.8)})}
+  // aura sương hồn ~55
+  const NA=55,ap=new Float32Array(NA*3),as=[];for(let i=0;i<NA;i++)as.push([lr(0,6.3),lr(.5,1.8),lr(0,6),lr(.5,1.3)]);
+  const aG=new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(ap,3));
+  const au=new T.Points(aG,new T.PointsMaterial({map:dot,color:0x60ffd0,size:.4,blending:T.AdditiveBlending,transparent:true,opacity:.85,depthWrite:false}));g.add(au);
+  const ll=new T.PointLight(0x60ffd0,14,9,1.5);ll.position.set(0,4,1.5);g.add(ll);
+  g.anim=(t,e)=>{b.position.y=.35+Math.sin(t*1.8)*.18;hd.rotation.y=Math.sin(t*.7)*.12;hd.rotation.x=e.state=='howl'?-.3:Math.sin(t*.9)*.05;
+   arms.forEach((a,i)=>{a.rotation.x=e.state=='slam'?-1.8+Math.min(1,e.st)*2:Math.sin(t*1.6+i*2)*.15;a.rotation.z=(i?1:-1)*.25});
+   st.rotation.z=Math.sin(t*1.2)*.08;sk.rotation.y=t*3;sk.rotation.x=t*1.2;const p=(1+Math.sin(t*4))*.5;sk.scale.setScalar(.9+p*.25);skG.scale.setScalar(.85+p*.3);skG.material.opacity=.3+p*.25;
+   heart.scale.setScalar(.9+p*.3);heart.rotation.y=t*2;egs.forEach(h=>h.material.opacity=.32+Math.sin(t*5)*.12+(e.state=='howl'||e.state=='orbs'?.25:0));
+   gems.forEach((gm,i)=>{gm.rotation.y=t*2+i;gm.scale.setScalar(.9+Math.sin(t*3+i)*.15)});
+   wisps.forEach((w,i)=>{const aa=w.a+t*.7+i*.3;w.m.position.set(Math.cos(aa)*w.r,w.h+Math.sin(t*2+w.o)*.25,Math.sin(aa)*w.r);const q=.8+Math.sin(t*5+i)*.2;w.m.scale.setScalar(q)});
+   const pa=aG.attributes.position;for(let i=0;i<NA;i++){const[a,r,o,s]=as[i];const k=(t*.25*s+o/6)%1,aa=a+t*.55+k;pa.setXYZ(i,Math.cos(aa)*r*(1+k*.2),.2+k*6.5,Math.sin(aa)*r*(1+k*.2))}pa.needsUpdate=true;
+   ll.intensity=12+p*4+(e.state=='orbs'?4:0)};return g},
  slimeKing(){const g=new T.Group();const S=new T.Group();S.scale.setScalar(3.6);g.add(S);
   const jel=new T.Group();S.add(jel);
   const outer=mesh(new T.SphereGeometry(.74,18,14),M(0x5ce070,{flatShading:false,transparent:true,opacity:.5,roughness:.12,metalness:.05,emissive:0x0c3a14,depthWrite:false}),[0,.5,0]);outer.scale.y=.72;outer.renderOrder=2;jel.add(outer);
@@ -80832,27 +80886,72 @@ const MODELS={
    crest.rotation.y=Math.sin(t*.8)*.1;const ep=.35+Math.sin(t*4.5)*.12;eg.forEach(h=>h.material.opacity=ep);
    const cy=2.2,pa=aG.attributes.position;for(let i=0;i<NA;i++){const[a,r,o,dy]=as[i];const k=(t*.3+o/6)%1,aa=a+t*.7;pa.setXYZ(i,Math.cos(aa)*r*(1+k*.35),cy+dy+k*1.8,Math.sin(aa)*r*(1+k*.35)-.2)}pa.needsUpdate=true;
    ll.intensity=10+Math.sin(t*3)*2};return g},
- demon(){const g=new T.Group();const bb=new T.Group();bb.scale.setScalar(1.9);g.add(bb);
-  const arm=M(0x1c1a24,{metalness:.7,roughness:.35}),arm2=M(0x3a2048,{metalness:.6,roughness:.4}),gold=M(0x8a6a2a,{metalness:.8,roughness:.3});
-  bb.add(mesh(new T.CylinderGeometry(.75,.55,1.4,7),arm,[0,1.9,0]));bb.add(mesh(new T.CylinderGeometry(.55,.8,.6,7),arm2,[0,1.1,0]));
-  bb.add(mesh(new T.ConeGeometry(.95,1.1,8,1,true),M(0x3a2048,{side:T.DoubleSide,metalness:.6}),[0,.95,0]));
-  for(const x of[-.28,.28])bb.add(mesh(new T.BoxGeometry(.32,.8,.36),arm,[x,.4,0]));
-  for(const s of[-1,1]){bb.add(mesh(new T.DodecahedronGeometry(.48,0),arm2,[s*.95,2.5,0]));for(let k=0;k<3;k++){const sp=mesh(new T.ConeGeometry(.09,.5,5),gold,[s*(1+k*.12),2.85,-.2+k*.2],false);sp.rotation.z=-s*.5;bb.add(sp)}}
-  const hd=new T.Group();hd.position.y=2.95;bb.add(hd);hd.add(mesh(new T.BoxGeometry(.6,.6,.62),arm));hd.add(mesh(new T.ConeGeometry(.32,.35,4),arm,[0,-.2,.32]));
-  const hm=M(0xd8cfc0);for(const s of[-1,1]){const h1=mesh(new T.ConeGeometry(.13,.9,6),hm,[s*.45,.45,0]);h1.rotation.z=-s*.75;const h2=mesh(new T.ConeGeometry(.08,.5,5),hm,[s*.8,.85,0],false);h2.rotation.z=-s*.1;hd.add(h1,h2)}
-  const em=B(0xff2020);for(const x of[-.14,.14])hd.add(mesh(new T.BoxGeometry(.14,.06,.05),em,[x,.05,.32],false));
-  const bc=mesh(new T.PlaneGeometry(1.7,2.6,1,2),M(0x2a0a30,{side:T.DoubleSide}),[0,1.3,-.55]);bc.rotation.x=-.12;bb.add(bc);
-  const core=mesh(new T.OctahedronGeometry(.18,0),B(0xc040ff),[0,2,.55],false);bb.add(core);
-  const wP=new T.Group();wP.position.set(.95,1.9,.2);bb.add(wP);wP.add(mesh(new T.CylinderGeometry(.06,.06,3.2,6),M(0x2a2030),[0,-.3,0]));
-  const axe=mesh(new T.CylinderGeometry(.9,.9,.08,3,1,false,0,Math.PI),arm,[0,1.1,0]);axe.rotation.x=Math.PI/2;wP.add(axe);
-  const ed=new T.Mesh(new T.TorusGeometry(.92,.04,4,12,Math.PI),B(0xff3050));ed.position.y=1.1;ed.rotation.z=-Math.PI/2;wP.add(ed);wP.rotation.x=-.3;
-  const NA=160,ap=new Float32Array(NA*3),as=[];for(let i=0;i<NA;i++)as.push([rnd(0,6.3),rnd(.6,2.2),rnd(0,6)]);
-  const au=new T.Points(new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(ap,3)),new T.PointsMaterial({map:dot,color:0xb050ff,size:.5,blending:T.AdditiveBlending,transparent:true,opacity:.85,depthWrite:false}));g.add(au);
-  const au2=new T.Points(au.geometry,new T.PointsMaterial({map:dot,color:0x200030,size:.7,transparent:true,opacity:.7,depthWrite:false}));g.add(au2);
-  g.weapon=wP;g.anim=(t,e)=>{bb.position.y=Math.sin(t*2)*.08;bc.rotation.x=-.12-Math.sin(t*2.5)*.06;core.rotation.y=t*2;
-   const pa=au.geometry.attributes.position;for(let i=0;i<NA;i++){const[a,r,o]=as[i];const y=(t*.9+o)%4.5;pa.setXYZ(i,Math.cos(a+t*.4)*r*(1+y*.15),y*1.4,Math.sin(a+t*.4)*r*(1+y*.15))}pa.needsUpdate=true;
-   if(e.state=='slam')wP.rotation.x=-.3-Math.min(1,e.st/1)*2.4;else if(e.state=='charge')wP.rotation.x=1;else wP.rotation.x+=(-.3-wP.rotation.x)*.05};
-  const al=new T.PointLight(0xa040ff,20,10,1.5);al.position.set(0,3,1);g.add(al);return g},
+ demon(){const g=new T.Group();const bb=new T.Group();bb.scale.setScalar(1.9);g.add(bb);for(let k=0;k<480;k++)rnd(0,1);// giữ RNG gameplay (cũ: 160 hạt × 3 rnd)
+  let ls=7070;const lr=(a,c)=>a+((ls=ls*16807%2147483647)/2147483647)*(c-a);
+  const arm=M(0x141218,{metalness:.75,roughness:.32,emissive:0x080406}),arm2=M(0x2a0e18,{metalness:.65,roughness:.4,emissive:0x120408}),
+   crim=M(0x4a1018,{metalness:.5,roughness:.45,emissive:0x200408}),plate=M(0x1c1a24,{metalness:.8,roughness:.28,emissive:0x0a0608}),
+   gold=M(0x8a5a20,{metalness:.85,roughness:.3,emissive:0x2a1400}),hornM=M(0x2a1a14,{roughness:.7,emissive:0x100808}),
+   lv=B(0xff4a1a),lv2=B(0xff9040),lvG=B(0xff6010,{transparent:true,opacity:.4,blending:T.AdditiveBlending,depthWrite:false}),
+   eyeM=B(0xffe060),eyeG=B(0xff6020,{transparent:true,opacity:.45,blending:T.AdditiveBlending,depthWrite:false});
+  // thân giáp đen/đỏ + khe dung nham
+  bb.add(mesh(new T.CylinderGeometry(.78,.58,1.5,8),arm,[0,1.95,0]));
+  bb.add(mesh(new T.CylinderGeometry(.58,.82,.65,8),arm2,[0,1.1,0]));
+  // vết nứt lava dọc thân
+  for(const[x,y,h]of[[0,2,.9],[.35,1.7,.6],[-.3,1.85,.55],[.2,1.2,.45],[-.25,1.25,.4]]){bb.add(mesh(new T.BoxGeometry(.04,h,.03),lv,[x,y,.55],false));bb.add(mesh(new T.BoxGeometry(.08,h*.9,.02),lvG,[x,y,.56],false))}
+  // váy giáp tatter
+  bb.add(mesh(new T.ConeGeometry(1.0,1.15,8,1,true),M(0x2a0a14,{side:T.DoubleSide,metalness:.55,roughness:.5,emissive:0x100408}),[0,.95,0]));
+  {const NP=6,im=new T.InstancedMesh(new T.BoxGeometry(.35,.7,.08),crim,NP),d=new T.Object3D();
+   for(let i=0;i<NP;i++){const a=i/NP*Math.PI*2+lr(0,.2);d.position.set(Math.cos(a)*.7,.55,Math.sin(a)*.55);d.lookAt(0,.55,0);d.rotateY(Math.PI);d.scale.set(1,lr(.8,1.3),1);d.updateMatrix();im.setMatrixAt(i,d.matrix)}bb.add(im)}
+  // chân
+  for(const x of[-.3,.3]){bb.add(mesh(new T.BoxGeometry(.34,.85,.38),arm,[x,.4,0]));bb.add(mesh(new T.BoxGeometry(.4,.18,.5),plate,[x,.05,.08]));
+   bb.add(mesh(new T.BoxGeometry(.05,.5,.03),lv,[x,.45,.2],false))}
+  // vai + gai
+  for(const s of[-1,1]){bb.add(mesh(new T.DodecahedronGeometry(.5,0),arm2,[s*1.0,2.55,-.02]));
+   bb.add(mesh(new T.TorusGeometry(.38,.04,3,10),lv,[s*1.0,2.48,0],false));
+   for(let k=0;k<3;k++){const sp=mesh(new T.ConeGeometry(.1,.55-k*.08,5),gold,[s*(1.05+k*.14),2.95-k*.05,-.15+k*.2],false);sp.rotation.z=-s*(.45+k*.12);bb.add(sp);
+    const tip=mesh(new T.ConeGeometry(.04,.12,4),lv2,[s*(1.05+k*.14)+s*Math.sin(.45+k*.12)*(.28-k*.04),2.95-k*.05+Math.cos(.45+k*.12)*(.28-k*.04),-.15+k*.2],false);bb.add(tip)}}
+  // lõi ngực
+  const core=mesh(new T.OctahedronGeometry(.2,0),lv2,[0,2.05,.58],false);bb.add(core);
+  const cG=mesh(new T.SphereGeometry(.36,10,8),lvG,[0,2.05,.6],false);bb.add(cG);
+  const fr=new T.Mesh(new T.TorusGeometry(.28,.05,4,10),gold);fr.position.set(0,2.05,.58);bb.add(fr);
+  // đầu + sừng cong lớn + vương miện lửa
+  const hd=new T.Group();hd.position.y=3.0;bb.add(hd);
+  hd.add(mesh(new T.BoxGeometry(.62,.58,.6),arm));
+  hd.add(mesh(new T.ConeGeometry(.3,.32,5),arm2,[0,-.18,.34]));// mõm
+  hd.add(mesh(new T.BoxGeometry(.36,.08,.2),crim,[0,-.28,.4],false));
+  // sừng cong 2 đoạn
+  for(const s of[-1,1]){const h1=mesh(new T.ConeGeometry(.14,1.05,6),hornM,[s*.42,.5,-.05]);h1.rotation.z=-s*.85;h1.rotation.x=-.25;hd.add(h1);
+   const h2=mesh(new T.ConeGeometry(.08,.55,5),hornM,[s*.95,.95,-.15],false);h2.rotation.z=-s*.15;h2.rotation.x=-.5;hd.add(h2);
+   hd.add(mesh(new T.ConeGeometry(.04,.15,4),lv2,[s*1.1,1.2,-.28],false))}
+  // mắt glow
+  const egs=[];for(const x of[-.15,.15]){hd.add(mesh(new T.BoxGeometry(.14,.07,.05),eyeM,[x,.08,.32],false));
+   const h=mesh(new T.SphereGeometry(.1,8,6),eyeG,[x,.08,.34],false);hd.add(h);egs.push(h)}
+  // vương miện lửa (5 gai)
+  for(let q=0;q<5;q++){const a=(q-2)*.38,hh=q==2?.42:.28;const sp=mesh(new T.ConeGeometry(.06,hh,4),gold,[Math.sin(a)*.2,.32+hh/2,Math.cos(a)*.08],false);sp.rotation.z=-a*.45;hd.add(sp);
+   hd.add(mesh(new T.ConeGeometry(.035,.12,4),lv2,[Math.sin(a)*.2,.32+hh*.9,Math.cos(a)*.08],false))}
+  // áo choàng
+  const bc=mesh(new T.PlaneGeometry(1.9,2.8,1,3),M(0x1a0610,{side:T.DoubleSide,emissive:0x100208,roughness:.85}),[0,1.35,-.6]);bc.rotation.x=-.12;bb.add(bc);
+  const bc2=mesh(new T.PlaneGeometry(1.5,2.2,1,2),M(0x3a0a18,{side:T.DoubleSide,emissive:0x180408,transparent:true,opacity:.7}),[0,1.4,-.55],false);bc2.rotation.x=-.1;bb.add(bc2);
+  // vũ khí khổng lồ (giữ g.weapon + anim slam/charge)
+  const wP=new T.Group();wP.position.set(1.0,1.95,.25);bb.add(wP);
+  wP.add(mesh(new T.CylinderGeometry(.07,.055,3.4,6),M(0x2a2030,{metalness:.6,roughness:.4}),[0,-.25,0]));
+  wP.add(mesh(new T.TorusGeometry(.12,.04,4,8),gold,[0,1.15,0],false));
+  const axe=mesh(new T.CylinderGeometry(1.0,1.0,.1,3,1,false,0,Math.PI),arm,[0,1.2,0]);axe.rotation.x=Math.PI/2;wP.add(axe);
+  const ed=new T.Mesh(new T.TorusGeometry(1.02,.045,4,14,Math.PI),lv);ed.position.y=1.2;ed.rotation.z=-Math.PI/2;wP.add(ed);
+  wP.add(mesh(new T.ConeGeometry(.2,.45,4),lv2,[0,1.55,0],false));
+  wP.rotation.x=-.3;
+  // aura than hồng ~56
+  const NA=56,ap=new Float32Array(NA*3),as=[];for(let i=0;i<NA;i++)as.push([lr(0,6.3),lr(.7,2.2),lr(0,6),lr(.6,1.4)]);
+  const aG=new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(ap,3));
+  const au=new T.Points(aG,new T.PointsMaterial({map:dot,color:0xff9040,size:.45,blending:T.AdditiveBlending,transparent:true,opacity:.88,depthWrite:false}));g.add(au);
+  const au2=new T.Points(aG,new T.PointsMaterial({map:dot,color:0x2a0808,size:.75,transparent:true,opacity:.55,depthWrite:false}));g.add(au2);
+  const al=new T.PointLight(0xff6020,18,10,1.5);al.position.set(0,3.2,1.2);g.add(al);
+  g.weapon=wP;g.anim=(t,e)=>{bb.position.y=Math.sin(t*2)*.08;bc.rotation.x=-.12-Math.sin(t*2.5)*.08;bc2.rotation.x=-.1-Math.sin(t*2.5+.4)*.06;
+   const fla=e.state=='orbs'?1.4:e.state=='slam'?1.2:1,p=(1+Math.sin(t*4))*.5;core.scale.setScalar((.9+p*.3)*fla);core.rotation.y=t*2;cG.scale.setScalar((.85+p*.35)*fla);cG.material.opacity=.28+p*.25;
+   egs.forEach(h=>h.material.opacity=.35+Math.sin(t*6)*.12+(e.state=='charge'||e.state=='slam'?.3:0));hd.rotation.y=Math.sin(t*.8)*.1;hd.rotation.x=e.state=='slam'?-.2:Math.sin(t*.9)*.04;
+   const pa=aG.attributes.position;for(let i=0;i<NA;i++){const[a,r,o,s]=as[i];const k=(t*.28*s+o/6)%1,aa=a+t*.45+k*1.2;pa.setXYZ(i,Math.cos(aa)*r*(1+k*.25),.15+k*7,Math.sin(aa)*r*(1+k*.25))}pa.needsUpdate=true;
+   al.intensity=14+p*5*fla+Math.sin(t*11)*.8;
+   if(e.state=='slam')wP.rotation.x=-.3-Math.min(1,e.st/1)*2.4;else if(e.state=='charge')wP.rotation.x=1;else wP.rotation.x+=(-.3-wP.rotation.x)*.05};return g},
 };
 // mob stats
 const MOB={spitter1:{hp:2200,spd:1.6,dmg:55,r:.8,h:1.6,fly:0,ranged:0xc060ff,model:'slime',args:[0x9a50d0]},sonicbat:{hp:2000,spd:2.4,dmg:55,r:.7,h:2.5,fly:1,ranged:0x60e0ff,model:'bat'},shaman:{hp:3200,spd:2,dmg:80,r:.7,h:2.4,fly:0,ranged:0x90e0ff,model:'mage',args:[0x4a5a7a,0x90e0ff]},scorpion:{hp:3200,spd:3,dmg:80,r:.9,h:1.6,fly:0},sandmage:{hp:2600,spd:1.8,dmg:90,r:.7,h:2.4,fly:0,ranged:0xffa020,model:'mage',args:[0xc08040,0xffa020]},frog:{hp:3400,spd:2.4,dmg:90,r:.8,h:1.6,fly:0},spitter:{hp:2800,spd:1.8,dmg:90,r:.8,h:1.6,fly:0,ranged:0x80ff40,model:'frog',args:[0x7a40a0]},imp:{hp:2600,spd:2.2,dmg:100,r:.7,h:2.5,fly:1,ranged:0xff6010},golemling:{hp:6500,spd:1.8,dmg:150,r:1,h:2.4,fly:0},skeleton:{hp:4200,spd:2.6,dmg:120,r:.8,h:2.4,fly:0},archer:{hp:3400,spd:2,dmg:110,r:.8,h:2.4,fly:0,ranged:0x60ffd0},slime:{hp:2600,spd:1.6,dmg:60,r:.8,h:1.6,fly:0},bat:{hp:2200,spd:2.8,dmg:55,r:.7,h:2.5,fly:1},wolf:{hp:3800,spd:3.6,dmg:90,r:1,h:2,fly:0},orc:{hp:6000,spd:2.2,dmg:130,r:1,h:2.6,fly:0}};
