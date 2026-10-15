@@ -80443,6 +80443,41 @@ function groundTex(st){const c=document.createElement('canvas');c.width=c.height
   if(st.props=='forest'){for(let i=0;i<30;i++){x.globalAlpha=.2;x.fillStyle='#'+base.clone().lerp(new T.Color(0x8a7a40),.35).getHexString();x.beginPath();x.arc(rnd(0,512),rnd(0,512),rnd(3,8),0,7);x.fill()}}}
  x.globalAlpha=.10;x.strokeStyle='#'+new T.Color(st.ring).getHexString();x.lineWidth=2;for(let i=0;i<=512;i+=64){x.beginPath();x.moveTo(i,0);x.lineTo(i,512);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(512,i);x.stroke()}
  x.globalAlpha=1;const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(7,7);t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;return t}
+// pass8: forest in-arena obstacles = merged vertex-colored compound geometries (1 InstancedMesh per variant), own PRNG so global seed/positions unchanged
+function mkForestOB(){let s=9137;const r=()=>((s=s*16807%2147483647)/2147483647),R=(a,b)=>a+r()*(b-a);
+ const P=(g,col,pos=[0,0,0],rot=[0,0,0],scl=[1,1,1],jit=0)=>{g=g.index?g.toNonIndexed():g;['uv','normal'].forEach(a=>g.attributes[a]&&g.deleteAttribute(a));const p=g.attributes.position;
+  if(jit)for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),h=Math.sin(x*12.9898+y*78.233+z*37.719)*43758.5453,f=1+((h-Math.floor(h))-.5)*jit;p.setXYZ(i,x*f,y*f,z*f)}
+  g.scale(...scl);g.rotateX(rot[0]);g.rotateZ(rot[2]);g.rotateY(rot[1]);g.translate(...pos);const c=new T.Color(col),ca=new Float32Array(p.count*3);for(let i=0;i<p.count;i++){ca[i*3]=c.r;ca[i*3+1]=c.g;ca[i*3+2]=c.b}g.setAttribute('color',new T.BufferAttribute(ca,3));return g};
+ const MG=parts=>{let n=0;parts.forEach(g=>n+=g.attributes.position.count);const pos=new Float32Array(n*3),col=new Float32Array(n*3);let o=0;
+  parts.forEach(g=>{pos.set(g.attributes.position.array,o*3);col.set(g.attributes.color.array,o*3);o+=g.attributes.position.count;g.dispose()});
+  const m=new T.BufferGeometry();m.setAttribute('position',new T.BufferAttribute(pos,3));m.setAttribute('color',new T.BufferAttribute(col,3));m.computeVertexNormals();return m};
+ const ground=(rr,col)=>P(new T.CircleGeometry(rr,11),col,[0,.03,0],[-Math.PI/2,0,0]);
+ const shroom=(x,z,k,cap=0xd8402a)=>[P(new T.CylinderGeometry(.035*k,.05*k,.2*k,5),0xeee2c8,[x,.1*k,z]),P(new T.SphereGeometry(.12*k,6,3,0,Math.PI*2,0,Math.PI/2),cap,[x,.18*k,z]),P(new T.SphereGeometry(.03*k,4,2),0xfff6e8,[x+.05*k,.25*k,z])];
+ const fern=(x,z,len,ang,col=0x3e8a34)=>P(new T.ConeGeometry(.09,len,3),col,[x+Math.cos(ang)*len*.3,len*.42,z+Math.sin(ang)*len*.3],[Math.sin(ang)*.75,0,-Math.cos(ang)*.75]);
+ const roots=(n,rad,len,th,col,y=.12)=>{const a=[];for(let k=0;k<n;k++){const an=k/n*6.283+R(-.3,.3);a.push(P(new T.CylinderGeometry(th*.35,th,len,5),col,[Math.cos(an)*rad,y,Math.sin(an)*rad],[Math.sin(an)*1.25,0,-Math.cos(an)*1.25]))}return a};
+ // A: mossy rock outcrop (r~1.3)
+ const rockA=MG([ground(1.65,0x34502a),
+  P(new T.DodecahedronGeometry(1,0),0x7c7a72,[0,.62,0],[0,.3,0],[1.25,.9,1.05],.32),P(new T.DodecahedronGeometry(.62,0),0x66665e,[.9,.36,.4],[.4,1,0],[1,.85,1],.3),
+  P(new T.DodecahedronGeometry(.48,0),0x86847a,[-.75,.28,.7],[0,2,.3],[1,.8,1.1],.3),P(new T.DodecahedronGeometry(.55,0),0x72716a,[-.35,1.05,-.55],[.1,.5,.22],[.62,1.7,.72],.25),
+  P(new T.SphereGeometry(.78,7,4),0x4f8a3e,[-.05,1.32,.05],[0,0,0],[1,.32,.9],.15),P(new T.SphereGeometry(.42,6,4),0x5e9c46,[.9,.66,.4],[0,0,0],[1,.38,1],.15),
+  P(new T.SphereGeometry(.36,6,3),0x467a36,[-.32,1.95,-.55],[0,0,0],[1,.35,1],.15),P(new T.IcosahedronGeometry(.32,0),0x4a8a3a,[.55,.95,-.6],[0,0,0],[1,.7,.6]),
+  ...[0,1,2,3,4,5].map(k=>{const a=k*1.05+.4,rr=1.15+(k%2)*.15;return fern(Math.cos(a)*rr,Math.sin(a)*rr,R(.55,.85),a,k%2?0x3e8a34:0x4f9a3a)}),
+  ...shroom(-1.15,-.3,1),...shroom(-1.0,-.55,.7,0xe0703a),...shroom(.3,1.2,.8)]);
+ // B: big broken hollow tree stump (r~1.3)
+ const rim=[];for(let k=0;k<7;k++){const a=k/7*6.283,h=R(.3,.75);rim.push(P(new T.ConeGeometry(.36,h,5),k%2?0x7d6648:0x6a5540,[Math.cos(a)*.74,1.52+h*.42,Math.sin(a)*.74],[Math.sin(a)*.18,R(0,1),-Math.cos(a)*.18]))}
+ const stumpB=MG([ground(1.6,0x3a4a26),P(new T.CylinderGeometry(.92,1.12,1.6,9),0x6a5640,[0,.8,0],[0,0,0],[1,1,1],.08),P(new T.CylinderGeometry(.74,.74,.06,9),0x2a2018,[0,1.58,0]),...rim,
+  ...roots(6,1.0,1.2,.3,0x58462f),P(new T.SphereGeometry(.7,7,4),0x4f8a3e,[.35,1.5,.4],[0,0,.15],[1,.28,.8],.15),P(new T.SphereGeometry(.55,6,4),0x5a9a44,[-.85,.35,.3],[0,0,0],[.7,.45,1],.15),
+  P(new T.SphereGeometry(.32,7,3),0xd8a860,[-.95,1.0,-.2],[0,0,0],[.55,.22,.95]),P(new T.SphereGeometry(.26,7,3),0xc89050,[-.88,.7,-.5],[0,0,0],[.55,.22,.95]),P(new T.SphereGeometry(.22,7,3),0xe0b870,[.2,.95,-1.02],[0,0,0],[.95,.22,.55]),
+  fern(1.05,.7,.7,.6),fern(1.2,-.1,.6,0),fern(.6,-1.05,.55,-1.1),...shroom(.9,-.85,.9),...shroom(-1.25,.75,.7,0xe0703a)]);
+ // C: cut stump w/ rings (r~.5)
+ const stumpC=MG([ground(.85,0x34502a),P(new T.CylinderGeometry(.42,.52,.78,8),0x6e5a40,[0,.39,0],[0,0,0],[1,1,1],.06),P(new T.CylinderGeometry(.39,.39,.03,8),0xd8b888,[0,.79,0]),P(new T.CylinderGeometry(.24,.24,.035,8),0xb08a5a,[0,.8,0]),P(new T.CylinderGeometry(.08,.08,.04,6),0x8a6a40,[0,.81,0]),
+  ...roots(4,.5,.55,.14,0x5e4a32,.08),P(new T.SphereGeometry(.3,6,4),0x4f8a3e,[-.32,.45,.22],[0,0,0],[.6,.6,.9],.15),...shroom(.5,.3,.8),...shroom(.58,.05,.55,0xe0703a),fern(-.45,-.4,.5,-2.4)]);
+ // D: splintered broken stump + bracket fungus (r~.5)
+ const sp=[];for(let k=0;k<5;k++){const a=k/5*6.283+.3,h=R(.22,.5);sp.push(P(new T.ConeGeometry(.17,h,5),k%2?0x7d6648:0x5e4a32,[Math.cos(a)*.24,1.04+h*.42,Math.sin(a)*.24],[Math.sin(a)*.15,0,-Math.cos(a)*.15]))}
+ const stumpD=MG([ground(.8,0x3a4a26),P(new T.CylinderGeometry(.36,.5,1.1,7),0x665238,[0,.55,0],[0,0,0],[1,1,1],.07),P(new T.CylinderGeometry(.3,.3,.05,7),0x2a2018,[0,1.08,0]),...sp,...roots(4,.46,.5,.13,0x58462f,.08),
+  P(new T.SphereGeometry(.2,7,3),0xd8a860,[.36,.7,0],[0,0,0],[.9,.22,.55]),P(new T.SphereGeometry(.15,7,3),0xe0b870,[.33,.45,.15],[0,0,0],[.9,.22,.55]),P(new T.SphereGeometry(.28,6,4),0x5a9a44,[-.2,.95,-.15],[0,0,0],[1,.3,1],.15),
+  fern(-.5,.3,.55,2.6),fern(-.3,.55,.45,2.0),fern(.1,-.6,.5,-1.4,0x4f9a3a)]);
+ return [[[rockA,stumpB],0xffffff,1.3,[0,0,0]],[[stumpC,stumpD],0xffffff,.5,[0,0,0]]]}
 function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geometry.dispose()});arena=new T.Group();S.add(arena);fires=[];sway=[];swayMats=[];seed=7+st.idx*13;
  S.background=new T.Color(st.bg);S.fog=new T.Fog(st.fog[0],st.fog[1]*1.3,st.fog[2]*1.5);hemi.color.set(st.hemi[0]);hemi.groundColor.set(st.hemi[1]);hemi.intensity=st.hemi[2];
  key.color.set(st.key[0]);key.intensity=st.key[1]*1.2;rim.color.set(st.rim[0]);rim.intensity=st.rim[1]*1.5;R.toneMappingExposure=1.15;
@@ -80546,14 +80581,14 @@ function buildArena(st){S.remove(arena);arena.traverse(o=>{if(o.geometry)o.geome
   const pm=M(0x3a3646),fm=B(0xff7a20);for(let i=0;i<12;i++){const a=i/12*Math.PI*2,g=new T.Group();g.position.set(Math.cos(a)*(ARENA+1.5),0,Math.sin(a)*(ARENA+1.5));const h=rnd(4,8);
    g.add(mesh(new T.CylinderGeometry(.7,.9,h,6),pm,[0,h/2,0],false));if(i%2==0){const f=mesh(new T.ConeGeometry(.45,1.2,6),fm,[0,h+.6,0],false);g.add(f);fires.push(f)}arena.add(g)}
   for(let i=0;i<8;i++){const a=rnd(0,6.3);arena.add(mesh(new T.BoxGeometry(rnd(3,6),rnd(8,16),rnd(3,6)),M(0x1d1a26),[Math.cos(a)*rnd(26,36),4,Math.sin(a)*rnd(26,36)],false))}}
- obs=[];const OB={forest:[[new T.ConeGeometry(1.6,4,6),0x2f6b3a,1.3,[0,2.6,0]],[new T.CylinderGeometry(.35,.45,1.4,5),0x5a3b25,.5,[0,.7,0]]],cave:[[new T.ConeGeometry(1.2,5,5),0x3a3450,1.1,[0,2.5,0]],[new T.OctahedronGeometry(.8,0),0x40e0ff,.8,[0,.9,0],1]],
+ obs=[];const OB={forest:p=='forest'?mkForestOB():null,cave:[[new T.ConeGeometry(1.2,5,5),0x3a3450,1.1,[0,2.5,0]],[new T.OctahedronGeometry(.8,0),0x40e0ff,.8,[0,.9,0],1]],
   snow:[[new T.ConeGeometry(1.5,4,6),0x2a5a4a,1.2,[0,2.4,0]],[new T.DodecahedronGeometry(1.1,0),0x8a94a8,1.1,[0,.5,0]]],desert:[[new T.DodecahedronGeometry(1.3,0),0xb08050,1.3,[0,.6,0]],[new T.CylinderGeometry(.35,.4,2.6,6),0x4a8a3a,.6,[0,1.3,0]]],
   swamp:[[new T.CylinderGeometry(.25,.6,4,5),0x3a2a1a,.7,[0,2,0]],[new T.DodecahedronGeometry(1,0),0x4a5a3a,1,[0,.4,0]]],volcano:[[new T.ConeGeometry(1.3,4.5,5),0x2a1a18,1.2,[0,2.2,0]],[new T.DodecahedronGeometry(1,0),0x3a2a24,1,[0,.5,0]]],
   grave:[[new T.BoxGeometry(1.4,2,.5),0x6a7078,.9,[0,1,0]],[new T.CylinderGeometry(.2,.45,4.5,5),0x2a2420,.6,[0,2.2,0]]],castle:[[new T.CylinderGeometry(.9,1.1,6,6),0x3a3646,1.1,[0,3,0]],[new T.BoxGeometry(1.8,1.2,1.8),0x2a2632,1.2,[0,.6,0]]]}[p];
- const NOB=34,dm=new T.Object3D();OB.forEach(([geo,col,rad,off,glow],k)=>{const im=new T.InstancedMesh(geo,glow?B(col):M(col),NOB/2);im.castShadow=true;let c=0,tries=0;
+ const NOB=34,dm=new T.Object3D(),tc=new T.Color();OB.forEach(([geo,col,rad,off,glow],k)=>{const vs=Array.isArray(geo)?geo.map(g=>{const v=new T.InstancedMesh(g,M(0xffffff,{vertexColors:true,roughness:.92}),NOB/2);v.castShadow=true;v.receiveShadow=true;v.count=0;return v}):null;const im=vs?null:new T.InstancedMesh(geo,glow?B(col):M(col),NOB/2);if(im)im.castShadow=true;let c=0,tries=0;
   while(c<NOB/2&&tries++<400){const a=rnd(0,6.28),r=rnd(7,ARENA-2.5),x=Math.cos(a)*r,z=Math.sin(a)*r,sc=rnd(.8,1.4);if(obs.some(o=>Math.hypot(o.x-x,o.z-z)<o.r+rad*sc+2.2))continue;
-   dm.position.set(x+off[0],off[1]*sc,z+off[2]);dm.rotation.set(0,rnd(0,6.3),0);dm.scale.setScalar(sc);dm.updateMatrix();im.setMatrixAt(c,dm.matrix);const lo=dm.clone();lo.scale.set(sc,sc*.12,sc);lo.position.y=off[1]*sc*.12;lo.updateMatrix();obs.push({x,z,r:rad*sc,im,i:c,m:dm.matrix.clone(),ml:lo.matrix.clone(),low:false});c++}
-  im.count=c;arena.add(im)});
+   dm.position.set(x+off[0],off[1]*sc,z+off[2]);dm.rotation.set(0,rnd(0,6.3),0);dm.scale.setScalar(sc);dm.updateMatrix();const tim=vs?vs[c%vs.length]:im,ti=vs?tim.count++:c;tim.setMatrixAt(ti,dm.matrix);if(vs){const hv=Math.sin(c*91.7+k*13.1)*4375.85,v=.86+.26*(hv-Math.floor(hv));tim.setColorAt(ti,tc.setRGB(v,v,v*.97))}const lo=dm.clone();lo.scale.set(sc,sc*.12,sc);lo.position.y=off[1]*sc*.12;lo.updateMatrix();obs.push({x,z,r:rad*sc,im:tim,i:ti,m:dm.matrix.clone(),ml:lo.matrix.clone(),low:false});c++}
+  if(vs)vs.forEach(v=>{if(v.instanceColor)v.instanceColor.needsUpdate=true;arena.add(v)});else{im.count=c;arena.add(im)}});
  const n=Math.round(st.part.n*1.6),pp=new Float32Array(n*3);for(let i=0;i<n;i++){pp[i*3]=rnd(-34,34);pp[i*3+1]=rnd(0,10);pp[i*3+2]=rnd(-34,34)}
  particles=new T.Points(new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(pp,3)),new T.PointsMaterial({map:dot,color:st.part.c,size:st.part.mode=='snow'?.22:.28,blending:st.part.mode=='snow'?T.NormalBlending:T.AdditiveBlending,transparent:true,depthWrite:false}));particles.mode=st.part.mode;arena.add(particles);
  const dp=new Float32Array(150*3);for(let i=0;i<150;i++){dp[i*3]=rnd(-30,30);dp[i*3+1]=rnd(.2,3);dp[i*3+2]=rnd(-30,30)}
