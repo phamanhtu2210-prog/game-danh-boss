@@ -80627,17 +80627,108 @@ const MODELS={
    fiss.forEach((f,i)=>{f.material.opacity=.7+Math.sin(t*6+i)*.3});
    const pa=aG.attributes.position;for(let i=0;i<NA;i++){const[a,r,o,h]=as[i];const k=(t*.4+o/6)%1;pa.setXYZ(i,Math.cos(a+t*.5)*r*(1+k*.3),k*3.5+h*.2,Math.sin(a+t*.5)*r*(1+k*.3))}pa.needsUpdate=true;
    plgt.intensity=10+Math.sin(t*7)*3+Math.sin(t*2.1)*1.5};return g},
- hydra(){const g0=new T.Group();const g=new T.Group();g0.add(g);g.scale.setScalar(1.7);g0.anim=(t,e)=>g.anim(t,e);const cm=M(0x2a7a5a),dm=M(0x1a4a3a);const bd=mesh(new T.SphereGeometry(1.6,10,7),cm,[0,1.2,0]);bd.scale.set(1.2,.8,1.3);g.add(bd);const heads=[];
-  for(let k=-1;k<=1;k++){const n=new T.Group();n.position.set(k*1,1.8,.6);g.add(n);for(let j=0;j<5;j++)n.add(mesh(new T.SphereGeometry(.38-j*.03,7,5),j%2?cm:dm,[0,j*.55,j*.15],false));
-   const hd=new T.Group();hd.position.set(0,2.9,.9);n.add(hd);hd.add(mesh(new T.BoxGeometry(.6,.45,.8),cm,[0,0,0]));eyes(hd,0xd0ff40,.15,.3,.2,.07);hd.add(mesh(new T.BoxGeometry(.5,.12,.5),B(0x500808),[0,-.18,.25],false));heads.push(n)}
-  for(const x of[-1,1])g.add(mesh(new T.ConeGeometry(.3,1.6,5),dm,[x*.8,.4,-1.6],false)).children;
-  g.anim=(t,e)=>{heads.forEach((n,k)=>{n.rotation.z=(k-1)*.35+Math.sin(t*2+k*2)*.15;n.rotation.x=-.2+Math.sin(t*2.5+k)*.15+(e.state=='sonic'||e.state=='spitRing'?.4:0)})};return g0},
- fireGolem(){const g=new T.Group();const rm=M(0x302220,{roughness:1}),lv=B(0xff6010);const b=new T.Group();b.scale.setScalar(2);g.add(b);
-  b.add(mesh(new T.DodecahedronGeometry(.8,0),rm,[0,1.8,0]));b.add(mesh(new T.DodecahedronGeometry(.45,0),rm,[0,2.75,.15]));eyes(b,0xffd040,2.8,.52,.15,.08);
-  b.add(mesh(new T.OctahedronGeometry(.3,0),lv,[0,1.9,.7],false));const arms=[];for(const x of[-1,1]){const a=new T.Group();a.position.set(x*1.05,2.2,0);a.add(mesh(new T.DodecahedronGeometry(.4,0),rm,[0,0,0]));a.add(mesh(new T.DodecahedronGeometry(.45,0),rm,[0,-.9,.1]));b.add(a);arms.push(a)}
-  for(const x of[-.4,.4])b.add(mesh(new T.BoxGeometry(.45,.9,.45),rm,[x,.45,0]));for(let k=0;k<8;k++)b.add(mesh(new T.BoxGeometry(.06,.5,.04),lv,[rnd(-.6,.6),rnd(1.3,2.3),.75],false));
-  const fl=new T.PointLight(0xff6020,15,9,1.5);fl.position.set(0,4,2);g.add(fl);
-  g.anim=(t,e)=>{arms.forEach((a,i)=>a.rotation.x=e.state=='slam'?-2.5+Math.min(1,e.st)*2.8:Math.sin(t*2+i*3)*.2);b.position.y=Math.sin(t*1.5)*.05};return g},
+ hydra(){const g0=new T.Group();const g=new T.Group();g0.add(g);g.scale.setScalar(1.7);g0.anim=(t,e)=>g.anim(t,e);let ls=4242;const lr=(a,c)=>a+((ls=ls*16807%2147483647)/2147483647)*(c-a);
+  const scM=M(0x0e4656,{emissive:0x03161f,roughness:.5,metalness:.2}),scM2=M(0x17707e,{emissive:0x052630,roughness:.45,metalness:.25}),belM=M(0x7ac8a8,{emissive:0x10302a,roughness:.55}),finM=M(0x38e0d8,{emissive:0x0c5a66,side:T.DoubleSide,transparent:true,opacity:.82,roughness:.3}),
+   toothM=M(0xf4f6ea,{roughness:.4}),mouthM=B(0x6a1020),hornM=M(0xd8d0b0,{roughness:.45,emissive:0x1a1a10}),goldM=M(0xffc840,{metalness:.85,roughness:.25,emissive:0x3a2600}),
+   eyeM=B(0xfff070),eyeGM=B(0x40f0ff,{transparent:true,opacity:.5,blending:T.AdditiveBlending,depthWrite:false});
+  // thân vảy nửa chìm dưới nước
+  const BX=1.92,BY=1.2,BZ=2.08,BC=.75;const bd=mesh(new T.SphereGeometry(1.6,14,9),scM,[0,BC,0]);bd.scale.set(1.2,.75,1.3);g.add(bd);
+  const bel=mesh(new T.SphereGeometry(1.1,10,7),belM,[0,.7,.95],false);bel.scale.set(1.15,.6,.8);g.add(bel);
+  // vảy lục giác: 1 InstancedMesh
+  const NS=46,scl=new T.InstancedMesh(new T.CylinderGeometry(.24,.2,.07,6),M(0xffffff,{emissive:0x04202a,roughness:.35,metalness:.35}),NS);scl.castShadow=true;
+  {const d=new T.Object3D(),up=new T.Vector3(0,1,0),n=new T.Vector3(),c=new T.Color(),c1=new T.Color(0x1a8a96),c2=new T.Color(0x0a3a50);let k=0;
+   for(let i=0;k<NS&&i<200;i++){const ph=Math.acos(1-(i+.5)/70*1.2),th=i*2.39996;if(ph>1.25)continue;const sx=Math.sin(ph)*Math.cos(th),sy=Math.cos(ph),sz=Math.sin(ph)*Math.sin(th);
+    d.position.set(sx*BX*.99,BC+sy*BY*.99,sz*BZ*.99);n.set(sx/BX,sy/BY,sz/BZ).normalize();d.quaternion.setFromUnitVectors(up,n);d.rotateY(lr(0,1));d.scale.setScalar(lr(.85,1.15));d.updateMatrix();scl.setMatrixAt(k,d.matrix);scl.setColorAt(k,c.copy(c1).lerp(c2,lr(0,1)));k++}
+   scl.count=k}g.add(scl);
+  // vây lưng + đuôi
+  const finG=new T.ConeGeometry(.28,.9,3),dfs=[];for(let i=0;i<5;i++){const z=-.2-i*.42,y=BC+BY*Math.sqrt(Math.max(0,1-(z/BZ)**2))-.08;const f=mesh(finG,finM,[0,y+.3,z],false);f.scale.set(.18,1-i*.12,1);f.rotation.x=-.5;g.add(f);dfs.push(f)}
+  const tail=new T.Group();tail.position.set(0,.35,-1.9);g.add(tail);const tsG=new T.SphereGeometry(.3,8,6);for(let i=0;i<4;i++){const s=mesh(tsG,i%2?scM2:scM,[0,.25+i*.28,-.25-i*.3],false);s.scale.setScalar(1-i*.18);tail.add(s)}
+  const tf=mesh(new T.ConeGeometry(.4,.9,3),finM,[0,1.5,-1.35],false);tf.scale.x=.15;tf.rotation.x=-.7;tail.add(tf);
+  // mặt nước: đĩa trong mờ + bọt quanh thân + gợn sóng lan
+  const wat=mesh(new T.CylinderGeometry(3.2,3.2,.06,28),M(0x1a8cb0,{transparent:true,opacity:.6,roughness:.08,metalness:.4,emissive:0x0a3a52,flatShading:false,depthWrite:false}),[0,.3,0],false);wat.renderOrder=2;g.add(wat);
+  const foam=new T.Mesh(new T.TorusGeometry(1,.07,4,28),B(0xd8ffff,{transparent:true,opacity:.45,blending:T.AdditiveBlending,depthWrite:false}));foam.rotation.x=Math.PI/2;foam.position.y=.34;foam.scale.set(1.82,1.98,1);g.add(foam);
+  const ripG=new T.TorusGeometry(1,.035,3,32),rips=[];for(let i=0;i<3;i++){const r=new T.Mesh(ripG,B(0x80f0ff,{transparent:true,opacity:.5,blending:T.AdditiveBlending,depthWrite:false}));r.rotation.x=Math.PI/2;r.position.y=.35;g.add(r);rips.push(r)}
+  // 3 cổ rắn nhiều đốt + đầu
+  const segG=new T.SphereGeometry(.34,9,7),plG=new T.BoxGeometry(.26,.24,.1),spG=new T.ConeGeometry(.1,.34,3),tthG=new T.ConeGeometry(.035,.17,4),necks=[],jaws=[],egs=[],crs=[];
+  for(let i=0;i<3;i++){const k=i-1;const root=new T.Group();root.position.set(k*1.05,1.25,.75-Math.abs(k)*.3);g.add(root);const segs=[];let par=root;
+   for(let j=0;j<6;j++){const s=new T.Group();s.position.y=j?.42:0;par.add(s);const r=1-j*.07;
+    const sm=mesh(segG,j%2?scM:scM2,[0,.2,0]);sm.scale.set(r,1.15,r);s.add(sm);
+    const pl=mesh(plG,belM,[0,.2,.27*r],false);pl.scale.set(r,1,1);pl.rotation.x=-.12;s.add(pl);
+    const sp=mesh(spG,finM,[0,.26,-.33*r],false);sp.rotation.x=-.7;sp.scale.x=.35;s.add(sp);segs.push(s);par=s}
+   const hd=new T.Group();hd.position.set(0,.5,.05);hd.rotation.x=-.65;par.add(hd);if(!k)hd.scale.setScalar(1.15);
+   const sk=mesh(new T.SphereGeometry(.4,10,7),scM2,[0,.1,0]);sk.scale.set(.95,.68,1.2);hd.add(sk);
+   hd.add(mesh(new T.BoxGeometry(.44,.15,.56),scM,[0,.1,.52]));hd.add(mesh(new T.BoxGeometry(.38,.05,.5),mouthM,[0,.0,.46],false));
+   for(const s of[-1,1])for(let q=0;q<4;q++){const tt=mesh(tthG,toothM,[s*.17,.0,.3+q*.14],false);tt.rotation.x=Math.PI;hd.add(tt)}
+   const jaw=new T.Group();jaw.position.set(0,-.04,.08);hd.add(jaw);jaw.add(mesh(new T.BoxGeometry(.38,.09,.6),scM,[0,-.05,.38],false));jaw.add(mesh(new T.BoxGeometry(.3,.03,.5),mouthM,[0,.005,.36],false));
+   for(const s of[-1,1])for(let q=0;q<3;q++)jaw.add(mesh(tthG,toothM,[s*.15,.06,.3+q*.15],false));jaws.push(jaw);
+   for(const s of[-1,1]){hd.add(mesh(new T.SphereGeometry(.07,7,5),eyeM,[s*.22,.22,.3],false));const h=mesh(new T.SphereGeometry(.13,8,6),eyeGM,[s*.22,.22,.31],false);hd.add(h);egs.push(h);
+    const br=mesh(new T.BoxGeometry(.2,.05,.08),scM,[s*.2,.31,.3],false);br.rotation.z=s*.4;hd.add(br);
+    const cf=mesh(new T.ConeGeometry(.16,.55,3),finM,[s*.36,.08,-.12],false);cf.scale.z=.2;cf.rotation.set(-.4,0,-s*1.25);hd.add(cf);crs.push(cf);
+    const hn=mesh(new T.ConeGeometry(.05,.34,5),hornM,[s*.15,.34,-.18],false);hn.rotation.set(-1.1,0,-s*.25);hd.add(hn)}
+   for(let q=0;q<3;q++){const c=mesh(new T.ConeGeometry(.15,.62-q*.12,3),finM,[0,.32-q*.02,-.1-q*.18],false);c.scale.x=.18;c.rotation.x=-1.05-q*.15;hd.add(c);crs.push(c)}
+   if(!k){for(let q=-1;q<=1;q++){const sp=mesh(new T.ConeGeometry(.04,q?.18:.26,4),goldM,[q*.1,.36,.14],false);sp.rotation.x=.2;hd.add(sp)}
+    hd.add(mesh(new T.OctahedronGeometry(.06,0),B(0xffe060),[0,.27,.36],false));hd.add(mesh(new T.SphereGeometry(.11,8,6),B(0xffd040,{transparent:true,opacity:.35,blending:T.AdditiveBlending,depthWrite:false}),[0,.27,.37],false))}
+   necks.push({root,segs,ph:i*2.1})}
+  // aura giọt nước / sương
+  const NA=56,ap=new Float32Array(NA*3),as=[];for(let i=0;i<NA;i++)as.push([lr(0,6.3),lr(1.8,5.2),lr(0,6),lr(.5,1.5)]);
+  const aG=new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(ap,3));const au=new T.Points(aG,new T.PointsMaterial({map:dot,color:0xa0f4ff,size:.5,blending:T.AdditiveBlending,transparent:true,opacity:.8,depthWrite:false}));g0.add(au);
+  const ll=new T.PointLight(0x40e0ff,14,12,1.5);ll.position.set(0,6,2.5);g0.add(ll);let atk=0,slm=0;
+  g.anim=(t,e)=>{const at=(e.state=='sonic'||e.state=='spitRing')?1:0;atk+=(at-atk)*.12;const sl=e.state=='slam'?(e.st<1?-.5*Math.min(1,e.st):.7):0;slm+=(sl-slm)*.15;
+   necks.forEach(({root,segs,ph},i)=>{root.rotation.z=-(i-1)*.42+Math.sin(t*1.6+ph)*.1;root.rotation.x=(i==1?.22:-.05)+Math.sin(t*1.9+ph)*.08+atk*.4+slm;
+    segs.forEach((s,j)=>{s.rotation.x=(j<2?.02:.2)+Math.sin(t*2.2+ph-j*.5)*.06;s.rotation.z=Math.sin(t*1.7+ph-j*.45)*.07})});
+   jaws.forEach((j,i)=>j.rotation.x=.12+Math.max(0,Math.sin(t*2.6+i*2.1))*.12+atk*.4+Math.max(0,slm)*.3);
+   const ep=.4+Math.sin(t*4.5)*.14;egs.forEach(h=>h.material.opacity=ep);crs.forEach((c,i)=>c.scale.y=1+Math.sin(t*5+i)*.06);dfs.forEach((f,i)=>f.rotation.z=Math.sin(t*2+i*.6)*.08);
+   tail.rotation.y=Math.sin(t*1.3)*.35;tail.rotation.x=Math.sin(t*1.7)*.08;bd.position.y=BC+Math.sin(t*1.5)*.04;scl.position.y=bd.position.y-BC;
+   foam.material.opacity=.35+Math.sin(t*3)*.1;rips.forEach((r,i)=>{const k=(t*.35+i/3)%1;r.scale.setScalar(2.1+k*1.4);r.material.opacity=(1-k)*.55});
+   const pa=aG.attributes.position;for(let i=0;i<NA;i++){const[a,r,o,s]=as[i];const k=(t*.25*s+o/6)%1,aa=a+t*.4;pa.setXYZ(i,Math.cos(aa)*r*(1+k*.2),.5+k*k*6.5,Math.sin(aa)*r*(1+k*.2)+.6)}pa.needsUpdate=true;
+   ll.intensity=12+Math.sin(t*2.4)*2.5+atk*4};return g0},
+ fireGolem(){const g=new T.Group();const b=new T.Group();b.scale.setScalar(2);g.add(b);for(let k=0;k<16;k++)rnd(0,1);// giữ nguyên chuỗi RNG gameplay như bản cũ (16 lần rnd)
+  let ls=777;const lr=(a,c)=>a+((ls=ls*16807%2147483647)/2147483647)*(c-a);
+  const rk=M(0x2a2424,{roughness:.95,emissive:0x0c0404}),rk2=M(0x3e3430,{roughness:.9,emissive:0x120604}),crM=M(0x161212,{roughness:.75,metalness:.25,emissive:0x080202}),
+   lv=B(0xff5a10),lv2=B(0xffb030),lvG=B(0xff6a20,{transparent:true,opacity:.45,blending:T.AdditiveBlending,depthWrite:false});
+  // lõi dung nham bên trong, lộ ra qua khe giữa các khối đá = vết nứt phát sáng
+  const CY=1.85;const inn=mesh(new T.IcosahedronGeometry(.74,1),lv,[0,CY,0],false);inn.scale.set(1.08,1,.82);b.add(inn);
+  const NC=32,ch=new T.InstancedMesh(new T.BoxGeometry(1,1,1),M(0xffffff,{roughness:.95,emissive:0x0a0404}),NC);ch.castShadow=true;
+  {const d=new T.Object3D(),c=new T.Color(),c1=new T.Color(0x241e1e),c2=new T.Color(0x54443a),o=new T.Vector3();let k=0;
+   for(let i=0;i<40&&k<NC;i++){const y=1-(i+.5)/40*2,r=Math.sqrt(1-y*y),th=i*2.39996,x=Math.cos(th)*r,z=Math.sin(th)*r;if(z>.78&&Math.abs(y)<.5)continue;
+    if(i%5==3)continue;d.position.set(x*.86,CY+y*.8,z*.66);o.set(x*2,CY+y*1.6,z*2);d.lookAt(o);d.rotateZ(lr(0,1.5));d.scale.set(lr(.5,.66),lr(.46,.6),lr(.3,.42));d.updateMatrix();ch.setMatrixAt(k,d.matrix);ch.setColorAt(k,c.copy(c1).lerp(c2,lr(0,1)));k++}
+   ch.count=k}b.add(ch);
+  // lõi nóng chảy ở ngực (đập nhịp)
+  const core=mesh(new T.OctahedronGeometry(.24,0),lv2,[0,CY+.08,.6],false);b.add(core);const cG=mesh(new T.SphereGeometry(.42,10,8),lvG,[0,CY+.08,.62],false);b.add(cG);
+  const fr=new T.Mesh(new T.TorusGeometry(.32,.07,4,8),crM);fr.position.set(0,CY+.08,.6);b.add(fr);
+  // hông, chân
+  b.add(mesh(new T.BoxGeometry(1.1,.4,.62),rk,[0,1.05,0]));b.add(mesh(new T.BoxGeometry(1.14,.05,.66),lv,[0,.92,0],false));
+  for(const x of[-.42,.42]){b.add(mesh(new T.BoxGeometry(.48,.5,.5),rk2,[x,.72,0]));b.add(mesh(new T.BoxGeometry(.5,.05,.52),lv,[x,.5,0],false));b.add(mesh(new T.BoxGeometry(.54,.42,.54),rk,[x,.3,.02]));b.add(mesh(new T.BoxGeometry(.62,.16,.74),crM,[x,.08,.08]))}
+  // vai đá + gai
+  for(const s of[-1,1]){const sh=mesh(new T.DodecahedronGeometry(.48,0),rk2,[s*1.02,2.5,-.05]);b.add(sh);const ring=new T.Mesh(new T.TorusGeometry(.4,.035,3,10),lv);ring.position.set(s*1.02,2.42,-.05);ring.rotation.set(Math.PI/2,s*.3,0);b.add(ring);
+   for(let q=0;q<3;q++){const sp=mesh(new T.ConeGeometry(.1,.5-q*.08,4),crM,[s*(1.05+q*.12),2.88-q*.06,-.25+q*.22],false);sp.rotation.z=-s*(.45+q*.15);b.add(sp);const th=.45+q*.15,L=(.5-q*.08)/2+.04;const tp=mesh(new T.ConeGeometry(.045,.13,4),lv2,[s*(1.05+q*.12)+s*Math.sin(th)*L,2.88-q*.06+Math.cos(th)*L,-.25+q*.22],false);tp.rotation.z=-s*(.45+q*.15);b.add(tp)}}
+  // đầu + vương miện gai đá đỉnh lửa
+  const hd=new T.Group();hd.position.set(0,2.72,.2);b.add(hd);const hb=mesh(new T.BoxGeometry(.56,.46,.5),rk2,[0,0,0]);hb.rotation.y=.08;hd.add(hb);
+  const brw=mesh(new T.BoxGeometry(.64,.13,.2),crM,[0,.13,.22],false);brw.rotation.x=.25;hd.add(brw);hd.add(mesh(new T.BoxGeometry(.5,.16,.3),rk,[0,-.2,.12],false));
+  const egs=[];for(const s of[-1,1]){hd.add(mesh(new T.BoxGeometry(.13,.065,.05),B(0xffe870),[s*.13,.03,.26],false));const h=mesh(new T.SphereGeometry(.11,8,6),lvG,[s*.13,.03,.28],false);hd.add(h);egs.push(h)}
+  hd.add(mesh(new T.BoxGeometry(.28,.045,.04),lv,[0,-.15,.28],false));
+  for(let q=0;q<5;q++){const a=(q-2)*.42,hh=q==2?.46:.3;const sp=mesh(new T.ConeGeometry(.07,hh,4),crM,[Math.sin(a)*.22,.23+hh/2,Math.cos(a)*.1-.05],false);sp.rotation.z=-a*.5;hd.add(sp);
+   const L=hh/2+.03;const tp=mesh(new T.ConeGeometry(.035,.1,4),lv2,[Math.sin(a)*.22+Math.sin(a*.5)*L,.23+hh/2+Math.cos(a*.5)*L,Math.cos(a)*.1-.05],false);tp.rotation.z=-a*.5;hd.add(tp)}
+  // tay (pivot giống bản cũ) + nắm đấm có vân dung nham
+  const arms=[],fists=[];for(const x of[-1,1]){const a=new T.Group();a.position.set(x*1.05,2.2,0);b.add(a);
+   a.add(mesh(new T.DodecahedronGeometry(.36,0),rk,[0,-.15,0]));a.add(mesh(new T.TorusGeometry(.26,.04,3,8),lv,[0,-.45,0],false));
+   const fa=mesh(new T.BoxGeometry(.5,.55,.5),rk2,[0,-.75,.05]);fa.rotation.y=.3;a.add(fa);a.add(mesh(new T.BoxGeometry(.05,.45,.04),lv,[x*.2,-.75,.27],false));
+   const fs=mesh(new T.DodecahedronGeometry(.48,0),rk,[0,-1.2,.12]);a.add(fs);for(let q=0;q<3;q++)a.add(mesh(new T.BoxGeometry(.32,.04,.04),lv,[0,-1.08-q*.12,.5],false));
+   a.add(mesh(new T.SphereGeometry(.34,8,6),B(0xff6a20,{transparent:true,opacity:.22,blending:T.AdditiveBlending,depthWrite:false}),[0,-1.22,.2],false));arms.push(a);fists.push(fs)}
+  // vũng dung nham dưới chân
+  const pud=mesh(new T.CircleGeometry(1.4,20),B(0xff5010,{transparent:true,opacity:.28,blending:T.AdditiveBlending,depthWrite:false}),[0,.03,.1],false);pud.rotation.x=-Math.PI/2;b.add(pud);
+  // giọt magma rơi từ nắm đấm
+  const dG=new T.SphereGeometry(.06,6,4),drips=[];for(let i=0;i<6;i++){const d=mesh(dG,lv2,[0,-9,0],false);d.scale.y=1.7;b.add(d);drips.push({d,o:i/6,pk:1,oy:0})}
+  // aura than hồng bay lên
+  const NA=56,ap=new Float32Array(NA*3),as=[];for(let i=0;i<NA;i++)as.push([lr(0,6.3),lr(.8,2.8),lr(0,6),lr(.6,1.4)]);
+  const aG=new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(ap,3));const au=new T.Points(aG,new T.PointsMaterial({map:dot,color:0xff8a30,size:.42,blending:T.AdditiveBlending,transparent:true,opacity:.9,depthWrite:false}));g.add(au);
+  const fl=new T.PointLight(0xff6020,15,10,1.5);fl.position.set(0,4,2);g.add(fl);const v=new T.Vector3();
+  g.anim=(t,e)=>{arms.forEach((a,i)=>a.rotation.x=e.state=='slam'?-2.5+Math.min(1,e.st)*2.8:Math.sin(t*2+i*3)*.2);b.position.y=Math.sin(t*1.5)*.05;
+   const fla=e.state=='orbs'?1.5:e.state=='howl'?1.2:1,p=(1+Math.sin(t*4))*.5;core.scale.setScalar((.9+p*.25)*fla);core.rotation.y=t*1.6;cG.scale.setScalar((.85+p*.35)*fla);cG.material.opacity=.3+p*.25;
+   lv.color.setRGB(1,.3+p*.14,.05+p*.04);egs.forEach(h=>h.material.opacity=.35+Math.sin(t*6)*.1+(e.state=='howl'?.3:0));hd.rotation.x=e.state=='howl'?-.35:Math.sin(t*.9)*.05;hd.rotation.y=Math.sin(t*.7)*.12;
+   drips.forEach((q,i)=>{const k=(t*.7+q.o)%1;if(k<q.pk){fists[i%2].getWorldPosition(v);b.worldToLocal(v);q.d.position.copy(v);q.oy=v.y-.35}q.pk=k;const y=q.oy-k*k*2.2;q.d.position.y=y;q.d.visible=y>.05});
+   const pa=aG.attributes.position;for(let i=0;i<NA;i++){const[a,r,o,s]=as[i];const k=(t*.22*s+o/6)%1,aa=a+t*.5+k*1.5;pa.setXYZ(i,Math.cos(aa)*r*(1-k*.3),.3+k*7.5,Math.sin(aa)*r*(1-k*.3)+.3)}pa.needsUpdate=true;
+   fl.intensity=12+p*5*fla+Math.sin(t*13)*.8};return g},
  lich(){const g=new T.Group();const rm=M(0x1a1a2a),bm=M(0xe8e0d0);const b=new T.Group();b.scale.setScalar(2.2);g.add(b);
   b.add(mesh(new T.ConeGeometry(.8,2.2,8,1,true),M(0x2a2a40,{side:T.DoubleSide}),[0,1.1,0]));b.add(mesh(new T.BoxGeometry(.4,.45,.4),bm,[0,2.4,0]));eyes(b,0x60ffd0,2.42,.21,.1,.06);
   b.add(mesh(new T.ConeGeometry(.45,.6,8,1,true),rm,[0,2.55,-.05],false));const cr=M(0x60ffd0,{emissive:0x20a080});for(let k=0;k<5;k++)b.add(mesh(new T.ConeGeometry(.04,.25,4),cr,[-.16+k*.08,2.75,0],false));
